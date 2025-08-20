@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Platformer</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="gameOverBox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10; justify-content:center; align-items:center;">
+      <div style="background:white; padding:40px 60px; border-radius:16px; text-align:center; box-shadow:0 4px 32px #0008;">
+        <h2>Fim de jogo!</h2>
+        <button id="restartBtn" style="font-size:1.2em; padding:10px 30px; border-radius:8px; border:none; background:#2196f3; color:white; cursor:pointer;">Recomeçar</button>
+      </div>
+    </div>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/player.js"></script>
+    <script src="scripts/platform.js"></script>
+    <script src="scripts/game.js"></script>
+</body>
+</html>
