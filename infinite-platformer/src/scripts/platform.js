@@ -1,10 +1,11 @@
 class Platform {
-    constructor(x, y, width, height, color = '#0000ff') {
+    constructor(x, y, width, height, color = '#0000ff', id = null) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.color = color;
+        this.id = id;
     }
 
     render(context) {
