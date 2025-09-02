@@ -3,20 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinite Platformer</title>
+    <title>As Aventuras de Maicon</title>
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <div id="gameOverBox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:10; justify-content:center; align-items:center;">
-      <div style="background:white; padding:40px 60px; border-radius:16px; text-align:center; box-shadow:0 4px 32px #0008;">
-        <h2>Fim de jogo!</h2>
-        <button id="restartBtn" style="font-size:1.2em; padding:10px 30px; border-radius:8px; border:none; background:#2196f3; color:white; cursor:pointer;">Recomeçar</button>
+    <!-- Tela de Início -->
+    <div id="startScreen" class="start-screen">
+        <div class="background-elements">
+            <div class="cloud cloud1"></div>
+            <div class="cloud cloud2"></div>
+            <div class="cloud cloud3"></div>
+            <div class="platform platform1"></div>
+            <div class="platform platform2"></div>
+            <div class="platform platform3"></div>
+            <div class="tree tree1"></div>
+            <div class="tree tree2"></div>
+        </div>
+        <div class="title-container">
+            <h1 class="game-title">AS AVENTURAS</h1>
+            <h1 class="game-title main-title">MAICON</h1>
+            <div class="character-container">
+                <div class="character"></div>
+            </div>
+            <button id="playBtn" class="play-button">
+                <span class="play-text">INICIAR</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="gameScreen" style="display: none; text-align: center;">
+        <h1 style="color: white; font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-family: Arial, sans-serif;">🎮 As Aventuras de Maicon 🎮</h1>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <p style="color: white; margin-top: 15px; font-size: 1.1em; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Use as setas ⬅️➡️ para mover e ESPAÇO para pular!</p>
+    </div>
+    <div id="gameOverBox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.9); z-index:10; justify-content:center; align-items:center;">
+      <div style="background:white; padding:40px 60px; border-radius:20px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:3px solid #1e3a8a;">
+        <h2 style="color:#1e3a8a; margin-bottom:20px; font-size:2em;">Fim de jogo!</h2>
+        <p style="color:#666; margin-bottom:25px; font-size:1.1em;">Você alcançou <span id="finalScore" style="color:#1e3a8a; font-weight:bold;">0</span> plataformas!</p>
+        <button id="restartBtn" style="font-size:1.2em; padding:12px 35px; border-radius:10px; border:none; background:#1e3a8a; color:white; cursor:pointer; transition:background-color 0.3s;">Recomeçar</button>
       </div>
     </div>
     <script src="scripts/utils.js"></script>
     <script src="scripts/player.js"></script>
     <script src="scripts/platform.js"></script>
-    <script src="scripts/game.js"></script>
+    <script src="scripts/game_fixed.js"></script>
 </body>
 </html>

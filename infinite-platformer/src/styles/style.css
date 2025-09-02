@@ -1,14 +1,459 @@
 body {
     margin: 0;
+    padding: 0;
     overflow: hidden;
-    background-color: #87CEEB;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif;
 }
 
+/* Tela de Início */
+.start-screen {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 50%, #7fb069 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    animation: fadeInBackground 1s ease-in;
+}
+
+.background-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    animation: slideInBackground 1.5s ease-out;
+}
+
+/* Nuvens */
+.cloud {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.9;
+}
+
+.cloud:before,
+.cloud:after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+}
+
+.cloud1 {
+    width: 100px;
+    height: 40px;
+    top: 15%;
+    left: 10%;
+    animation: float 6s ease-in-out infinite, slideInLeft 2s ease-out;
+}
+
+.cloud1:before {
+    width: 50px;
+    height: 50px;
+    top: -25px;
+    left: 10px;
+}
+
+.cloud1:after {
+    width: 60px;
+    height: 40px;
+    top: -15px;
+    right: 10px;
+}
+
+.cloud2 {
+    width: 80px;
+    height: 30px;
+    top: 25%;
+    right: 15%;
+    animation: float 8s ease-in-out infinite reverse, slideInRight 2.5s ease-out;
+}
+
+.cloud2:before {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 15px;
+}
+
+.cloud2:after {
+    width: 50px;
+    height: 30px;
+    top: -10px;
+    right: 15px;
+}
+
+.cloud3 {
+    width: 60px;
+    height: 25px;
+    top: 40%;
+    left: 20%;
+    animation: float 7s ease-in-out infinite, slideInLeft 3s ease-out;
+}
+
+.cloud3:before {
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: 10px;
+}
+
+.cloud3:after {
+    width: 40px;
+    height: 25px;
+    top: -8px;
+    right: 10px;
+}
+
+/* Plataformas */
+.platform {
+    position: absolute;
+    background: linear-gradient(45deg, #8B4513, #A0522D);
+    border-radius: 10px;
+    border: 2px solid #654321;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.platform1 {
+    width: 100px;
+    height: 20px;
+    bottom: 30%;
+    left: 5%;
+    transform: rotate(-5deg);
+    animation: slideUpFade 2s ease-out 0.5s both;
+}
+
+.platform2 {
+    width: 80px;
+    height: 20px;
+    bottom: 45%;
+    right: 10%;
+    transform: rotate(3deg);
+    animation: slideUpFade 2s ease-out 1s both;
+}
+
+.platform3 {
+    width: 120px;
+    height: 20px;
+    bottom: 20%;
+    right: 25%;
+    transform: rotate(-2deg);
+    animation: slideUpFade 2s ease-out 1.5s both;
+}
+
+/* Árvores */
+.tree {
+    position: absolute;
+    bottom: 0;
+}
+
+.tree:before {
+    content: '';
+    position: absolute;
+    width: 15px;
+    height: 60px;
+    background: #8B4513;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tree:after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #228B22;
+    border-radius: 50%;
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 
+        -15px -10px 0 #32CD32,
+        15px -10px 0 #32CD32,
+        0 -20px 0 #228B22;
+}
+
+.tree1 {
+    left: 5%;
+    animation: growUp 2s ease-out 1s both;
+}
+
+.tree2 {
+    right: 8%;
+    animation: growUp 2s ease-out 1.3s both;
+}
+
+/* Container do título */
+.title-container {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+    animation: fadeInUp 1.5s ease-out 0.5s both;
+}
+
+/* Título do jogo */
+.game-title {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-weight: 900;
+    margin: 10px 0;
+    text-shadow: 
+        3px 3px 0 #FF6B35,
+        6px 6px 10px rgba(0,0,0,0.5);
+    letter-spacing: 3px;
+}
+
+.game-title:first-child {
+    font-size: 3em;
+    color: #FFD700;
+    transform: rotate(-2deg);
+    animation: slideInDown 1s ease-out 1s both, bounce 2s ease-in-out 2s infinite;
+}
+
+.main-title {
+    font-size: 4.5em;
+    color: #FF4500;
+    margin-bottom: 30px;
+    transform: rotate(1deg);
+    animation: slideInDown 1s ease-out 1.5s both, bounce 2s ease-in-out 3s infinite;
+}
+
+/* Personagem */
+.character-container {
+    margin: 20px 0;
+    animation: zoomIn 1s ease-out 2s both;
+}
+
+.character {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto;
+    background: radial-gradient(circle, #FFB84D 30%, #FF8C42 70%);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    animation: characterBounce 3s ease-in-out infinite;
+}
+
+.character:before {
+    content: '👑';
+    position: absolute;
+    font-size: 30px;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.character:after {
+    content: '😊';
+    position: absolute;
+    font-size: 40px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Botão Play */
+.play-button {
+    background: linear-gradient(45deg, #FF6B35, #F7931E);
+    border: 4px solid #FFD700;
+    border-radius: 25px;
+    padding: 20px 40px;
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    margin: 30px 0;
+    box-shadow: 
+        0 8px 16px rgba(0,0,0,0.3),
+        inset 0 2px 4px rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    animation: bounceIn 1s ease-out 2.5s both, pulse 2s ease-in-out 4s infinite;
+}
+
+.play-button:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 
+        0 12px 24px rgba(0,0,0,0.4),
+        inset 0 2px 4px rgba(255,255,255,0.4);
+    background: linear-gradient(45deg, #FF8C42, #FFB84D);
+}
+
+.play-button:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+.play-text {
+    display: block;
+    letter-spacing: 2px;
+}
+
+/* Instruções */
+.instructions {
+    color: white;
+    font-size: 1.2em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    margin-top: 20px;
+    background: rgba(0,0,0,0.3);
+    padding: 10px 20px;
+    border-radius: 15px;
+    display: inline-block;
+    animation: fadeInUp 1s ease-out 3s both;
+}
+
+/* Animações */
+@keyframes fadeInBackground {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInBackground {
+    from { 
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from { 
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 0.9;
+    }
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(100px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 0.9;
+    }
+}
+
+@keyframes slideUpFade {
+    from { 
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes growUp {
+    from { 
+        transform: scaleY(0);
+        opacity: 0;
+    }
+    to { 
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from { 
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from { 
+        transform: translateY(-50px) rotate(-2deg);
+        opacity: 0;
+    }
+    to { 
+        transform: translateY(0) rotate(-2deg);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from { 
+        transform: scale(0);
+        opacity: 0;
+    }
+    to { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% { 
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(1deg); }
+    40% { transform: translateY(-10px) rotate(1deg); }
+    60% { transform: translateY(-5px) rotate(1deg); }
+}
+
+@keyframes characterBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-15px) scale(1.05); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Canvas do jogo */
 canvas {
     display: block;
-    margin: 0 auto;
-    background-color: #FFFFFF;
-    border: 2px solid #000;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 100%);
+    border: 3px solid #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Estilo para o botão de restart com hover */
+#restartBtn:hover {
+    background-color: #1d4ed8 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .player {
