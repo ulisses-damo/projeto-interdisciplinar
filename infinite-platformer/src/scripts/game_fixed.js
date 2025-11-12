@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 
 let player;
 let platforms = [];
-let gravity = 0.5;
+let gravity = 0.4;
 let isGameOver = false;
 let shouldMoveScreen = false;
 let currentLevel = 1;
@@ -61,7 +61,7 @@ function createPlatforms() {
     platforms = [];
     const platformWidth = 100;
     const platformHeight = 20;
-    const verticalGap = 140; // Aumentado para mais espaçamento
+    const verticalGap = 125; // Ajustado para player 64x64
     const maxHorizontalDistance = 100; // Distância máxima segura
     
     // Primeira plataforma centralizada
@@ -157,7 +157,21 @@ function gameLoop() {
 }
 
 function update() {
-    player.update();
+    // Atualizar player manualmente
+    player.x += player.velocityX;
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    
+    player.y += player.velocityY;
+    if (player.velocityY > 12) player.velocityY = 12;
+    
+    // Atualizar animação
+    player.frameCounter = player.frameCounter || 0;
+    player.frameCounter++;
+    if (player.frameCounter >= player.frameDelay) {
+        player.frameCounter = 0;
+        player.currentFrame = (player.currentFrame + 1) % player.totalFrames;
+    }
 
     platforms.forEach((platform, index) => {
         if (detectCollision(player, platform)) {
@@ -169,6 +183,11 @@ function update() {
             if (!visitedPlatforms.has(platform.id)) {
                 visitedPlatforms.add(platform.id);
                 currentLevel = visitedPlatforms.size;
+                // Atualizar contador na tela
+                const platformCountElement = document.getElementById('platformCounter');
+                if (platformCountElement) {
+                    platformCountElement.textContent = `Plataformas: ${currentLevel}`;
+                }
             }
 
             if (index === 2) {
@@ -267,53 +286,30 @@ Player.prototype.update = function() {
 function render() {
     player.render(ctx);
     platforms.forEach(platform => platform.render(ctx));
-    drawLevelCounter();
+    // drawLevelCounter(); // Removido - contador agora está fora do canvas
 }
 
-function drawLevelCounter() {
-    ctx.save();
-    
-    // Configurações do texto
-    ctx.font = 'bold 24px Arial';
-    const text = `Plataformas: ${currentLevel}`;
-    const textWidth = ctx.measureText(text).width;
-    const textHeight = 24;
-    
-    // Posição do contador (canto superior direito com margem)
-    const padding = 15;
-    const x = canvas.width - textWidth - padding * 2;
-    const y = padding;
-    
-    // Desenha o fundo do contador
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(x - padding, y, textWidth + padding * 2, textHeight + padding);
-    
-    // Desenha a borda
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x - padding, y, textWidth + padding * 2, textHeight + padding);
-    
-    // Desenha o texto
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(text, x, y + textHeight);
-    
-    ctx.restore();
-}
 
 window.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {
         player.jump();
     } else if (event.code === 'ArrowLeft') {
         player.velocityX = -3;
-        player.facingLeft = true; 
+        if (player.velocityX !== 0) { // Só muda direção se estiver se movendo
+            player.facingLeft = true;
+        }
     } else if (event.code === 'ArrowRight') {
         player.velocityX = 3;
-        player.facingLeft = false;
+        if (player.velocityX !== 0) { // Só muda direção se estiver se movendo
+            player.facingLeft = false;
+        }
     }
 });
 
 window.addEventListener('keyup', (event) => {
-    if (event.code === 'ArrowLeft' || event.code === 'ArrowRight') {
+    if (event.code === 'ArrowLeft' && player.velocityX < 0) {
+        player.velocityX = 0;
+    } else if (event.code === 'ArrowRight' && player.velocityX > 0) {
         player.velocityX = 0;
     }
 });

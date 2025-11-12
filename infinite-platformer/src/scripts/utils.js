@@ -3,12 +3,18 @@ function getRandomInt(min, max) {
 }
 
 function detectCollision(rect1, rect2) {
-    return (
-        rect1.x < rect2.x + rect2.width &&
-        rect1.x + rect1.width > rect2.x &&
-        rect1.y < rect2.y + rect2.height &&
-        rect1.y + rect1.height > rect2.y
-    );
+    // Verifica se há sobreposição horizontal
+    const horizontalOverlap = rect1.x < rect2.x + rect2.width && rect1.x + rect1.width > rect2.x;
+    
+    // Posição dos pés do player
+    const feetY = rect1.y + rect1.height;
+    const platformTop = rect2.y;
+    
+    // O player deve estar caindo e os pés devem estar na altura da plataforma (com tolerância)
+    const isFalling = rect1.velocityY > 0;
+    const feetOnTop = feetY > platformTop - 10 && feetY < platformTop + 20;
+    
+    return horizontalOverlap && feetOnTop && isFalling;
 }
 
 function clamp(value, min, max) {

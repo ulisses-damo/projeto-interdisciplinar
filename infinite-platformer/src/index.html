@@ -20,7 +20,7 @@
             <div class="tree tree2"></div>
         </div>
         <div class="title-container">
-            <h1 class="game-title">AS AVENTURAS</h1>
+            <h1 class="game-title">AS AVENTURAS DE</h1>
             <h1 class="game-title main-title">MAICON</h1>
             <div class="character-container">
                 <div class="character"></div>
@@ -32,10 +32,16 @@
     </div>
 
     <!-- Tela do Jogo -->
-    <div id="gameScreen" style="display: none; text-align: center;">
-        <h1 style="color: white; font-size: 2.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); font-family: Arial, sans-serif;">🎮 As Aventuras de Maicon 🎮</h1>
-        <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <p style="color: white; margin-top: 15px; font-size: 1.1em; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">Use as setas ⬅️➡️ para mover e ESPAÇO para pular!</p>
+    <div id="gameScreen" style="display: none;">
+        <div class="game-cloud game-cloud1"></div>
+        <div class="game-cloud game-cloud2"></div>
+        <div class="game-cloud game-cloud3"></div>
+        <h1 class="game-screen-title">🎮 As Aventuras de Maicon 🎮</h1>
+        <div id="platformCounter">Plataformas: 1</div>
+        <div style="margin-top: 70px; display: flex; flex-direction: column; align-items: center;">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <p class="game-instructions" style="margin-top: 10px; margin-bottom: 0;">Use as setas ⬅️➡️ para mover e ESPAÇO para pular!</p>
+        </div>
     </div>
     <div id="gameOverBox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.9); z-index:10; justify-content:center; align-items:center;">
       <div style="background:white; padding:40px 60px; border-radius:20px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:3px solid #1e3a8a;">

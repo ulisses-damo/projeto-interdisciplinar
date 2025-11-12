@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 50%, #7fb069 100%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -443,10 +443,152 @@ body {
 /* Canvas do jogo */
 canvas {
     display: block;
-    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 100%);
+    margin: 0 auto;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 50%, #7fb069 100%);
     border: 3px solid #ffffff;
     border-radius: 10px;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Container do jogo */
+#gameScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+/* Nuvens no fundo do jogo */
+.game-cloud {
+    position: fixed;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.game-cloud:before,
+.game-cloud:after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+}
+
+.game-cloud1 {
+    width: 80px;
+    height: 32px;
+    top: 100px;
+    left: 50px;
+    animation: float 6s ease-in-out infinite;
+}
+
+.game-cloud1:before {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 8px;
+}
+
+.game-cloud1:after {
+    width: 48px;
+    height: 32px;
+    top: -12px;
+    right: 8px;
+}
+
+.game-cloud2 {
+    width: 70px;
+    height: 28px;
+    top: 150px;
+    right: 80px;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.game-cloud2:before {
+    width: 35px;
+    height: 35px;
+    top: -18px;
+    left: 12px;
+}
+
+.game-cloud2:after {
+    width: 42px;
+    height: 28px;
+    top: -10px;
+    right: 12px;
+}
+
+.game-cloud3 {
+    width: 60px;
+    height: 24px;
+    top: 250px;
+    left: 100px;
+    animation: float 7s ease-in-out infinite;
+}
+
+.game-cloud3:before {
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: 10px;
+}
+
+.game-cloud3:after {
+    width: 36px;
+    height: 24px;
+    top: -8px;
+    right: 10px;
+}
+
+/* Contador de plataformas fora do canvas */
+#platformCounter {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 
+        2px 2px 0 #FF6B35,
+        4px 4px 8px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+    z-index: 100;
+    position: fixed;
+    top: 20px;
+    right: 30px;
+}
+
+/* Título da tela do jogo */
+.game-screen-title {
+    color: white;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    font-family: Arial, sans-serif;
+    z-index: 10;
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+}
+
+/* Instruções do jogo */
+.game-instructions {
+    color: white;
+    margin-top: 15px;
+    font-size: 1.1em;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    z-index: 10;
+    position: relative;
+    text-align: center;
 }
 
 /* Estilo para o botão de restart com hover */
