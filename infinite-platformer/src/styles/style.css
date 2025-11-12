@@ -241,24 +241,30 @@ body {
     position: relative;
     box-shadow: 0 8px 16px rgba(0,0,0,0.3);
     animation: characterBounce 3s ease-in-out infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .character:before {
-    content: '👑';
+    content: '';
     position: absolute;
-    font-size: 30px;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
+    width: 64px;
+    height: 64px;
+    background-image: url('../../assets/LULI.png');
+    background-size: 128px 128px; /* Spritesheet 2x2 com frames de 64x64 */
+    background-position: 0 0; /* Primeiro frame (canto superior esquerdo) */
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    transform: scale(1.2); /* Aumentar um pouco */
 }
 
 .character:after {
-    content: '😊';
-    position: absolute;
-    font-size: 40px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    content: '';
+    display: none;
 }
 
 /* Botão Play */
