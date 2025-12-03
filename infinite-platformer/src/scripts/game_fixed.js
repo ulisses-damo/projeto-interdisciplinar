@@ -6,6 +6,7 @@ let platforms = [];
 let gravity = 0.4;
 let isGameOver = false;
 let shouldMoveScreen = false;
+let scrollSpeed = 1; // Velocidade inicial de rolagem
 let currentLevel = 1;
 let visitedPlatforms = new Set();
 let platformIdCounter = 0;
@@ -51,6 +52,7 @@ function init() {
         firstPlatform.y - 50
     );
     isGameOver = false;
+    scrollSpeed = 1; // Reseta velocidade ao reiniciar
     currentLevel = 1;
     visitedPlatforms = new Set();
     platformIdCounter = 0;
@@ -183,6 +185,20 @@ function update() {
             if (!visitedPlatforms.has(platform.id)) {
                 visitedPlatforms.add(platform.id);
                 currentLevel = visitedPlatforms.size;
+                
+                // Aumenta a velocidade progressivamente a cada 10 plataformas até 50
+                if (currentLevel === 10) {
+                    scrollSpeed = 1.5;
+                } else if (currentLevel === 20) {
+                    scrollSpeed = 2;
+                } else if (currentLevel === 30) {
+                    scrollSpeed = 2.5;
+                } else if (currentLevel === 40) {
+                    scrollSpeed = 3;
+                } else if (currentLevel === 50) {
+                    scrollSpeed = 3.5;
+                }
+                
                 // Atualizar contador na tela
                 const platformCountElement = document.getElementById('platformCounter');
                 if (platformCountElement) {
@@ -195,7 +211,7 @@ function update() {
             }
         }
         if (shouldMoveScreen) {
-            platform.y += 1;
+            platform.y += scrollSpeed; // Usa velocidade variável
         }
         if (platform.y > canvas.height) {
             // Sistema de reposicionamento inteligente
