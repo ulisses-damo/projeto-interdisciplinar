@@ -55,3 +55,11 @@ infinite-platformer
 ## Agradecimentos
 - Inspirado em jogos clássicos de plataforma
 - Agradecimentos à comunidade open-source pelos recursos e bibliotecas utilizados neste projeto.
+
+
+##Melhorias pra agora
+
+-som
+-niveis
+-corrigir as plataformas
+-cut scene

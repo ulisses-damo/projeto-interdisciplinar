@@ -23,8 +23,8 @@ class Player {
         this.facingLeft = false;
         
         // Configuração da animação
-        this.frameWidth = 64; // largura de cada frame no spritesheet
-        this.frameHeight = 64; // altura de cada frame no spritesheet
+        this.frameWidth = 64; 
+        this.frameHeight = 64; 
         this.totalFrames = 3; // total de frames na animação
         this.currentFrame = 0;
         this.frameCounter = 0;
