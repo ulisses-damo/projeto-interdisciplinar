@@ -593,6 +593,51 @@ canvas {
     border: 1px solid rgba(255,255,255,0.2);
 }
 
+/* Indicador de Power-Up ativo */
+#powerUpIndicator {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    position: fixed;
+    top: 95px;
+    right: 30px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 6px 16px;
+    border-radius: 12px;
+    border: 2px solid #3B82F6;
+    font-family: 'Arial Black', Arial, sans-serif;
+    color: #fff;
+    font-size: 0.95em;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(4px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+    animation: powerupPulse 1.5s ease-in-out infinite;
+}
+
+#powerUpIndicator .powerup-emoji {
+    font-size: 1.3em;
+}
+
+#powerUpIndicator .powerup-label {
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+#powerUpIndicator .powerup-timer {
+    font-size: 0.85em;
+    opacity: 0.85;
+    margin-left: 4px;
+    background: rgba(255,255,255,0.15);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+@keyframes powerupPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
 /* Título da tela do jogo */
 .game-screen-title {
     color: white;

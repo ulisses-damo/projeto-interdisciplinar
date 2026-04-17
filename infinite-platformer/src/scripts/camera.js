@@ -6,7 +6,7 @@ const Camera = {
     highestPlayerY: 0,       // Posição Y mais alta que o jogador alcançou
     smooth: 0.08,            // Suavidade da câmera (0-1)
     targetOffset: 330,       // Jogador fica a ~55% da tela (600 * 0.55)
-    deathMargin: 30,         // Morre logo ao sair da tela por baixo
+    deathMargin: 20,         // Morre logo ao sair da tela por baixo
 
     reset(canvasHeight) {
         this.y = 0;

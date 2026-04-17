@@ -199,7 +199,7 @@ const PlatformGenerator = {
         if (level <= 2) {
             // Fácil: mais plataformas (60% de 3, 40% de 2)
             return roll < 0.6 ? 3 : 2;
-        } else if (level <= 4) {
+        } else if (level <= 3) {
             // Médio: balanceado (45% de 3, 55% de 2)
             return roll < 0.45 ? 3 : 2;
         } else {

@@ -66,14 +66,18 @@ class Platform {
     }
 
     render(context) {
-        const radius = 10;
-
         context.save();
-        
-        // Aplicar opacidade para plataformas desmoronando
+
+        // Plataformas que desmoronam → visual de NUVEM
         if (this.type === 'crumbling') {
             context.globalAlpha = this.crumbleOpacity;
+            this._renderCloud(context);
+            context.restore();
+            return;
         }
+
+        // === Plataforma normal ===
+        const radius = 10;
 
         // Sombra para profundidade
         context.shadowColor = 'rgba(0, 0, 0, 0.45)';
@@ -117,30 +121,71 @@ class Platform {
         context.closePath();
         context.fill();
 
-        // Indicador visual para plataformas que desmoronam (rachaduras)
-        if (this.type === 'crumbling') {
-            context.strokeStyle = 'rgba(255, 100, 50, 0.6)';
-            context.lineWidth = 1;
-            
-            // Rachaduras decorativas
+        context.restore();
+    }
+
+    // Renderiza plataforma como NUVEM fofa
+    _renderCloud(context) {
+        const cx = this.x + this.width / 2;
+        const cy = this.y + this.height / 2;
+        const w = this.width;
+        const h = this.height;
+
+        // Sombra suave da nuvem
+        context.shadowColor = 'rgba(0, 0, 0, 0.15)';
+        context.shadowBlur = 10;
+        context.shadowOffsetY = 4;
+
+        // Cor da nuvem (branca/azulada, escurece ao desmoronar)
+        const progress = this.crumbleStarted ? Math.min(this.crumbleTimer / this.crumbleMaxTime, 1) : 0;
+        const r = Math.round(235 + progress * 20);  // fica mais cinza
+        const g = Math.round(240 - progress * 60);
+        const b = Math.round(255 - progress * 80);
+        const cloudColor = `rgb(${r}, ${g}, ${b})`;
+
+        // Bolhas da nuvem — círculos sobrepostos
+        const puffs = [
+            { rx: -w * 0.32, ry: h * 0.05, rw: w * 0.22, rh: h * 0.7 },
+            { rx: -w * 0.15, ry: -h * 0.25, rw: w * 0.26, rh: h * 0.85 },
+            { rx: w * 0.02,  ry: -h * 0.35, rw: w * 0.28, rh: h * 0.9 },
+            { rx: w * 0.18,  ry: -h * 0.2, rw: w * 0.24, rh: h * 0.8 },
+            { rx: w * 0.33,  ry: h * 0.05, rw: w * 0.2,  rh: h * 0.65 },
+        ];
+
+        // Base plana da nuvem (elipse achatada)
+        context.fillStyle = cloudColor;
+        context.beginPath();
+        context.ellipse(cx, cy + h * 0.15, w * 0.48, h * 0.45, 0, 0, Math.PI * 2);
+        context.fill();
+
+        // Desenhar cada "puff"
+        for (const p of puffs) {
+            context.fillStyle = cloudColor;
             context.beginPath();
-            context.moveTo(this.x + this.width * 0.2, this.y);
-            context.lineTo(this.x + this.width * 0.35, this.y + this.height);
-            context.stroke();
-            
-            context.beginPath();
-            context.moveTo(this.x + this.width * 0.6, this.y);
-            context.lineTo(this.x + this.width * 0.5, this.y + this.height * 0.6);
-            context.lineTo(this.x + this.width * 0.7, this.y + this.height);
-            context.stroke();
-            
-            context.beginPath();
-            context.moveTo(this.x + this.width * 0.85, this.y + this.height * 0.2);
-            context.lineTo(this.x + this.width * 0.75, this.y + this.height);
-            context.stroke();
+            context.ellipse(cx + p.rx, cy + p.ry, p.rw, p.rh, 0, 0, Math.PI * 2);
+            context.fill();
         }
 
-        context.restore();
+        // Brilho no topo das puffs
+        context.shadowColor = 'transparent';
+        context.shadowBlur = 0;
+        context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+        for (const p of puffs) {
+            context.beginPath();
+            context.ellipse(
+                cx + p.rx, cy + p.ry - p.rh * 0.25,
+                p.rw * 0.7, p.rh * 0.4,
+                0, 0, Math.PI * 2
+            );
+            context.fill();
+        }
+
+        // Contorno sutil
+        context.strokeStyle = 'rgba(180, 200, 230, 0.35)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.ellipse(cx, cy + h * 0.15, w * 0.48, h * 0.45, 0, 0, Math.PI * 2);
+        context.stroke();
     }
 
     checkCollision(player) {

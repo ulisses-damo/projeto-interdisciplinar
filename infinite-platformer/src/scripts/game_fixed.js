@@ -29,6 +29,8 @@ function init(level) {
     // Reset módulos
     Camera.reset(canvas.height);
     PlatformGenerator.reset();
+    LavaManager.reset();
+    PowerUpManager.reset();
 
     // Criar plataformas
     const result = PlatformGenerator.createInitial(canvas.width, canvas.height, LevelManager.currentLevel);
@@ -137,6 +139,36 @@ function update() {
     // --- Câmera ---
     Camera.update(player.y);
 
+    // --- Power-ups (nível 3+) ---
+    PowerUpManager.update(LevelManager.currentLevel, platforms, canvas.width, Camera.y, canvas.height);
+    PowerUpManager.checkPickup(player);
+
+    // --- Gotas de lava (nível 3+) ---
+    LavaManager.update(LevelManager.currentLevel, canvas.width, canvas.height, Camera.y);
+    if (LavaManager.checkCollision(player)) {
+        // Escudo ativo? Ignorar hit
+        if (PowerUpManager.hasShield()) {
+            // Remove as gotas que colidiram para feedback visual
+            LavaManager.drops = LavaManager.drops.filter(drop => {
+                const dx = drop.x - (player.x + player.width / 2);
+                const dy = drop.y - (player.y + player.height / 2);
+                return Math.sqrt(dx * dx + dy * dy) >= 28 + drop.size;
+            });
+        } else if (PowerUpManager.useExtraLife()) {
+            // Vida extra consumida — sobrevive mas remove gotas próximas
+            LavaManager.drops = LavaManager.drops.filter(drop => {
+                const dx = drop.x - (player.x + player.width / 2);
+                const dy = drop.y - (player.y + player.height / 2);
+                return Math.sqrt(dx * dx + dy * dy) >= 28 + drop.size;
+            });
+        } else {
+            isGameOver = true;
+            SoundManager.stop();
+            UIManager.showGameOver(platformCount, LevelManager.currentLevel);
+            return;
+        }
+    }
+
     // --- Reposicionar plataformas que saíram por baixo ---
     for (let i = 0; i < platforms.length; i++) {
         if (Camera.isBelowScreen(platforms[i].y, canvas.height)) {
@@ -166,8 +198,17 @@ function render() {
         }
     }
 
+    // Power-ups no mundo
+    PowerUpManager.render(ctx);
+
     // Jogador
     player.render(ctx);
+
+    // Efeito visual do poder ativo no jogador
+    PowerUpManager.renderPlayerEffect(ctx, player);
+
+    // Gotas de lava (nível 3+)
+    LavaManager.render(ctx, canvas.height, Camera.y);
 
     ctx.restore();
 }
@@ -176,7 +217,14 @@ function render() {
 window.addEventListener('keydown', (event) => {
     if (!player) return;
     if (event.code === 'Space') {
-        player.jump();
+        if (!player.isJumping) {
+            player.jump();
+            player._doubleJumpUsed = false;
+        } else if (PowerUpManager.hasDoubleJump() && !player._doubleJumpUsed) {
+            // Pulo duplo!
+            player.velocityY = -10;
+            player._doubleJumpUsed = true;
+        }
     } else if (event.code === 'ArrowLeft') {
         player.velocityX = -3;
         player.facingLeft = true;
