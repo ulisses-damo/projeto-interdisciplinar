@@ -122,6 +122,14 @@ const UIManager = {
             playBtn.addEventListener('click', () => this.startGame());
         }
 
+        const retryBtn = document.getElementById('retryBtn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                this.hideGameOver();
+                if (this.onLevelSelected) this.onLevelSelected(LevelManager.currentLevel);
+            });
+        }
+
         const restartBtn = document.getElementById('restartBtn');
         if (restartBtn) {
             restartBtn.addEventListener('click', () => {
