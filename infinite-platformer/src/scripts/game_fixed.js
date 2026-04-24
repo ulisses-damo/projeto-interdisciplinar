@@ -27,7 +27,7 @@ function init(level) {
     platformIdCounter = 0;
 
     // Reset módulos
-    Camera.reset(canvas.height);
+    Camera.reset(canvas.height, LevelManager.currentLevel);
     PlatformGenerator.reset();
     LavaManager.reset();
     PowerUpManager.reset();
@@ -94,9 +94,18 @@ function update() {
         if (plat.isFalling) continue;
 
         if (detectCollision(player, plat)) {
-            player.y = plat.y - player.height;
+            const feetX = clamp(player.x + player.width / 2, plat.x, plat.x + plat.width);
+            const landingY = typeof plat.getSurfaceYAt === 'function'
+                ? plat.getSurfaceYAt(feetX)
+                : plat.y;
+
+            player.y = landingY - player.height;
             player.velocityY = 0;
             player.isJumping = false;
+
+            if (plat.isSlippery()) {
+                player.x = clamp(player.x + plat.getSlideVelocity(), 0, canvas.width - player.width);
+            }
 
             // Iniciar desmoronamento
             if (plat.type === 'crumbling' && !plat.crumbleStarted) {
@@ -171,15 +180,24 @@ function update() {
 
     // --- Reposicionar plataformas que saíram por baixo ---
     for (let i = 0; i < platforms.length; i++) {
-        if (Camera.isBelowScreen(platforms[i].y, canvas.height)) {
+        if (Camera.shouldRecycle(platforms[i].y, canvas.height)) {
             platformIdCounter = PlatformGenerator.reposition(
                 platforms[i], platforms, canvas.width, LevelManager.currentLevel, platformIdCounter
             );
         }
     }
 
+    platformIdCounter = PlatformGenerator.ensureBuffer(
+        platforms,
+        canvas.width,
+        canvas.height,
+        LevelManager.currentLevel,
+        platformIdCounter,
+        player
+    );
+
     // --- Game Over ---
-    if (Camera.isPlayerDead(player.y, canvas.height)) {
+    if (Camera.isPlayerDead(player, canvas.height)) {
         isGameOver = true;
         SoundManager.stop();
         UIManager.showGameOver(platformCount, LevelManager.currentLevel);
