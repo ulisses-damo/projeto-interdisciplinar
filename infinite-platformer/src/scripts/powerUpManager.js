@@ -30,7 +30,7 @@ const PowerUpManager = {
             label: 'Escudo',
             color: '#3B82F6',
             glowColor: 'rgba(59, 130, 246, 0.5)',
-            duration: 180, // 3 segundos a 60fps
+            duration: 300, // 5 segundos a 60fps
         },
         extraLife: {
             emoji: '❤️',
@@ -61,6 +61,7 @@ const PowerUpManager = {
         if (level < 3) return;
 
         this._animPhase += 0.05;
+        const descending = LevelManager.isDescending(level);
 
         // --- Timer do poder ativo ---
         if (this.active.type && this.active.timer > 0) {
@@ -83,7 +84,7 @@ const PowerUpManager = {
         // --- Remover itens que saíram da tela por baixo ---
         for (let i = this.items.length - 1; i >= 0; i--) {
             const screenY = this.items[i].y - cameraY;
-            if (screenY > canvasHeight + 150) {
+            if ((!descending && screenY > canvasHeight + 150) || (descending && screenY < -150)) {
                 this.items.splice(i, 1);
             }
         }
