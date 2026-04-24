@@ -7,6 +7,12 @@ const PlatformGenerator = {
     PLATFORM_WIDTH: 100,
     PLATFORM_HEIGHT: 20,
     EDGE_MARGIN: 5,
+    FRONT_BUFFER_PX: 320,   // Distância mínima de plataformas prontas à frente da câmera
+    RECYCLE_MARGIN: 80,     // Quanto uma plataforma precisa ficar para trás para poder reciclar
+    INITIAL_EXTRA_BUFFER: 360,
+    PLAYER_LOOKAHEAD_FRAMES: 18,
+    PLAYER_RETAIN_DISTANCE_FACTOR: 0.65,
+    MAX_PLAYER_FALL_SPEED: 12,
 
     // Configuração de camadas
     ROW_JITTER_Y: 18,       // Variação vertical dentro de uma camada (±px)
@@ -16,11 +22,11 @@ const PlatformGenerator = {
     MAX_PER_ROW: 3,         // Máximo de plataformas por camada
 
     // Rastreamento
-    highestRowY: 0,         // Y da camada mais alta já gerada
+    frontierRowY: 0,        // Y mais distante já gerado na direção do nível
     platformList: null,     // Referência para checar overlap
 
     reset() {
-        this.highestRowY = 0;
+        this.frontierRowY = 0;
         this.platformList = null;
     },
 
@@ -32,9 +38,10 @@ const PlatformGenerator = {
         this.platformList = platforms;
         const color = LevelManager.getPlatformColor(level);
         let idCounter = 0;
+        const descending = LevelManager.isDescending(level);
 
         // --- Primeira plataforma: spawn central ---
-        let rowY = canvasHeight - 40;
+        let rowY = descending ? 140 : canvasHeight - 40;
         platforms.push(new Platform(
             (canvasWidth - this.PLATFORM_WIDTH) / 2,
             rowY,
@@ -44,10 +51,10 @@ const PlatformGenerator = {
 
         // --- Gerar camadas para cima ---
         // Camadas suficientes para preencher a tela + buffer acima
-        const numRows = 9;
+        const numRows = this._getInitialRowCount(canvasHeight, level, rowY);
         for (let row = 1; row <= numRows; row++) {
             const gap = this._getRowGap(level);
-            rowY -= gap;
+            rowY += descending ? gap : -gap;
 
             const count = this._getPlatformsPerRow(level);
             const positions = this._generateRowPositions(count, canvasWidth);
@@ -65,7 +72,10 @@ const PlatformGenerator = {
             }
         }
 
-        this.highestRowY = rowY;
+        this.frontierRowY = platforms.reduce(
+            (edgeY, platform) => descending ? Math.max(edgeY, platform.y) : Math.min(edgeY, platform.y),
+            descending ? -Infinity : Infinity
+        );
         return { platforms, nextId: idCounter };
     },
 
@@ -95,36 +105,55 @@ const PlatformGenerator = {
     // Coloca em nova posição acima da mais alta
     // =======================================
     reposition(platform, allPlatforms, canvasWidth, level, nextId) {
-        // Encontrar a plataforma mais alta
-        let highestY = Infinity;
+        const descending = LevelManager.isDescending(level);
+
+        // Encontrar a faixa mais à frente na direção do nível
+        let frontierY = descending ? -Infinity : Infinity;
         for (const p of allPlatforms) {
-            if (p !== platform && !p.isFalling && p.y < highestY) {
-                highestY = p.y;
+            if (p === platform || p.isFalling) continue;
+
+            if (descending) {
+                if (p.y > frontierY) frontierY = p.y;
+            } else if (p.y < frontierY) {
+                frontierY = p.y;
             }
         }
 
-        // Quantas plataformas já estão perto do "topo"?
-        // Se poucas, gerar uma nova camada mais acima
-        const topZone = highestY + 40; // 40px de tolerância
-        let nearTop = 0;
+        if (!Number.isFinite(frontierY)) {
+            frontierY = platform.y;
+        }
+
+        // Quantas plataformas já estão perto da borda de avanço?
+        const frontZone = descending ? frontierY - 40 : frontierY + 40;
+        let nearFront = 0;
         for (const p of allPlatforms) {
-            if (p !== platform && !p.isFalling && p.y < topZone) {
-                nearTop++;
+            if (p === platform || p.isFalling) continue;
+
+            if (descending) {
+                if (p.y > frontZone) nearFront++;
+            } else if (p.y < frontZone) {
+                nearFront++;
             }
         }
 
         let newY;
-        if (nearTop < this.MIN_PER_ROW) {
-            // Poucas plataformas no topo — colocar na mesma faixa (completar a camada)
+        if (nearFront < this.MIN_PER_ROW) {
+            // Completa a camada já existente na borda de avanço
             const jitter = (Math.random() - 0.5) * this.ROW_JITTER_Y * 2;
-            newY = highestY + jitter;
+            newY = frontierY + jitter;
         } else {
-            // Camada do topo já tem plataformas suficientes — criar nova camada acima
+            // A camada atual já está cheia — criar outra mais à frente
             const gap = this._getRowGap(level);
-            newY = Math.min(highestY, this.highestRowY) - gap;
+            const referenceY = descending
+                ? Math.max(frontierY, this.frontierRowY)
+                : Math.min(frontierY, this.frontierRowY);
+
+            newY = referenceY + (descending ? gap : -gap);
             const jitter = (Math.random() - 0.5) * this.ROW_JITTER_Y * 2;
             newY += jitter;
-            this.highestRowY = Math.min(this.highestRowY, newY);
+            this.frontierRowY = descending
+                ? Math.max(this.frontierRowY, newY)
+                : Math.min(this.frontierRowY, newY);
         }
 
         // X aleatório pelo canvas inteiro, evitando sobreposição
@@ -134,17 +163,32 @@ const PlatformGenerator = {
         platform.y = newY;
         platform.id = nextId;
         platform.color = LevelManager.getPlatformColor(level);
+        this.frontierRowY = descending
+            ? Math.max(this.frontierRowY, platform.y)
+            : Math.min(this.frontierRowY, platform.y);
 
         // Tipo
-        const diff = LevelManager.getDifficulty(level);
-        if (diff.crumbleChance > 0) {
-            platform.type = Math.random() < diff.crumbleChance ? 'crumbling' : 'normal';
-        } else {
-            platform.type = 'normal';
-        }
+        platform.type = this._getType(level);
         platform.resetCrumble();
 
         return nextId + 1;
+    },
+
+    ensureBuffer(allPlatforms, canvasWidth, canvasHeight, level, nextId, player) {
+        let updatedId = nextId;
+        let attempts = 0;
+        const maxAttempts = allPlatforms.length;
+        const anchorY = this._getPlayerAnchorY(player, level);
+
+        while (!this._hasFrontBuffer(anchorY, level) && attempts < maxAttempts) {
+            const reusable = this._findReusablePlatform(allPlatforms, player, canvasHeight, level);
+            if (!reusable) break;
+
+            updatedId = this.reposition(reusable, allPlatforms, canvasWidth, level, updatedId);
+            attempts++;
+        }
+
+        return updatedId;
     },
 
     // =======================================
@@ -194,6 +238,75 @@ const PlatformGenerator = {
         return minGap + Math.random() * (maxGap - minGap);
     },
 
+    _getInitialRowCount(canvasHeight, level, startY) {
+        if (!LevelManager.isDescending(level)) {
+            return 9;
+        }
+
+        const averageGap = (this.MIN_ROW_GAP + this.MAX_ROW_GAP) / 2;
+        const predictiveSpan = this.MAX_PLAYER_FALL_SPEED * this.PLAYER_LOOKAHEAD_FRAMES;
+        const travelSpan = (canvasHeight - startY) + predictiveSpan + this.FRONT_BUFFER_PX + this.INITIAL_EXTRA_BUFFER;
+        return Math.max(9, Math.ceil(travelSpan / averageGap));
+    },
+
+    _getPlayerAnchorY(player, level) {
+        if (!player) return 0;
+
+        const descending = LevelManager.isDescending(level);
+        const verticalSpeed = descending
+            ? Math.max(player.velocityY || 0, 0)
+            : Math.max(-(player.velocityY || 0), 0);
+        const projectedOffset = verticalSpeed * this.PLAYER_LOOKAHEAD_FRAMES;
+
+        if (descending) {
+            return player.y + player.height + projectedOffset;
+        }
+
+        return player.y - projectedOffset;
+    },
+
+    _hasFrontBuffer(anchorY, level) {
+        const descending = LevelManager.isDescending(level);
+
+        if (descending) {
+            return this.frontierRowY >= anchorY + this.FRONT_BUFFER_PX;
+        }
+
+        return this.frontierRowY <= anchorY - this.FRONT_BUFFER_PX;
+    },
+
+    _findReusablePlatform(allPlatforms, player, canvasHeight, level) {
+        if (!player) return null;
+
+        const descending = LevelManager.isDescending(level);
+        let candidate = null;
+        let candidateScreenY = descending ? Infinity : -Infinity;
+        const retainDistance = canvasHeight * this.PLAYER_RETAIN_DISTANCE_FACTOR + this.RECYCLE_MARGIN;
+        const playerTop = player.y;
+        const playerBottom = player.y + player.height;
+
+        for (const platform of allPlatforms) {
+            if (platform.isFalling) continue;
+
+            if (descending) {
+                const safelyBehind = platform.y + platform.height < playerTop - retainDistance;
+                if (safelyBehind && platform.y < candidateScreenY) {
+                    candidate = platform;
+                    candidateScreenY = platform.y;
+                }
+                continue;
+            }
+
+            const safelyBehind = platform.y > playerBottom + retainDistance;
+            if (safelyBehind && platform.y > candidateScreenY) {
+                candidate = platform;
+                candidateScreenY = platform.y;
+            }
+        }
+
+        return candidate;
+    },
+
     _getPlatformsPerRow(level) {
         const roll = Math.random();
         if (level <= 2) {
@@ -208,8 +321,13 @@ const PlatformGenerator = {
         }
     },
 
-    _getType(level, rowIndex) {
+    _getType(level, rowIndex = 3) {
         if (rowIndex <= 2) return 'normal'; // Primeiras 2 camadas sempre seguras
+
+        if (level === 4 && Math.random() < 0.18) {
+            return Math.random() < 0.5 ? 'triangle-left' : 'triangle-right';
+        }
+
         const diff = LevelManager.getDifficulty(level);
         if (diff.crumbleChance > 0 && Math.random() < diff.crumbleChance) {
             return 'crumbling';
