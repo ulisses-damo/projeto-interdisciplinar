@@ -19,6 +19,32 @@ class Platform {
         this.crumbleOpacity = 1;
     }
 
+    isTriangle() {
+        return this.type === 'triangle-left' || this.type === 'triangle-right';
+    }
+
+    isSlippery() {
+        return this.isTriangle();
+    }
+
+    getSlideVelocity() {
+        if (!this.isTriangle()) return 0;
+        return this.type === 'triangle-left' ? 1.35 : -1.35;
+    }
+
+    getSurfaceYAt(worldX) {
+        if (!this.isTriangle()) return this.y;
+
+        const localX = clamp(worldX - this.x, 0, this.width);
+        const progress = localX / this.width;
+
+        if (this.type === 'triangle-left') {
+            return this.y + progress * this.height;
+        }
+
+        return this.y + (1 - progress) * this.height;
+    }
+
     startCrumble() {
         if (this.type !== 'crumbling' || this.crumbleStarted) return;
         this.crumbleStarted = true;
@@ -72,6 +98,12 @@ class Platform {
         if (this.type === 'crumbling') {
             context.globalAlpha = this.crumbleOpacity;
             this._renderCloud(context);
+            context.restore();
+            return;
+        }
+
+        if (this.isTriangle()) {
+            this._renderTriangle(context);
             context.restore();
             return;
         }
@@ -186,6 +218,71 @@ class Platform {
         context.beginPath();
         context.ellipse(cx, cy + h * 0.15, w * 0.48, h * 0.45, 0, 0, Math.PI * 2);
         context.stroke();
+    }
+
+    _renderTriangle(context) {
+        const points = this.type === 'triangle-left'
+            ? [
+                { x: this.x, y: this.y },
+                { x: this.x + this.width, y: this.y + this.height },
+                { x: this.x, y: this.y + this.height },
+            ]
+            : [
+                { x: this.x + this.width, y: this.y },
+                { x: this.x + this.width, y: this.y + this.height },
+                { x: this.x, y: this.y + this.height },
+            ];
+
+        context.shadowColor = 'rgba(0, 0, 0, 0.38)';
+        context.shadowBlur = 10;
+        context.shadowOffsetX = 0;
+        context.shadowOffsetY = 4;
+
+        const gradient = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.22)');
+        gradient.addColorStop(0.25, this.color);
+        gradient.addColorStop(1, 'rgba(15, 23, 42, 0.88)');
+
+        context.fillStyle = gradient;
+        context.beginPath();
+        context.moveTo(points[0].x, points[0].y);
+        context.lineTo(points[1].x, points[1].y);
+        context.lineTo(points[2].x, points[2].y);
+        context.closePath();
+        context.fill();
+
+        context.shadowColor = 'transparent';
+        context.shadowBlur = 0;
+        context.shadowOffsetY = 0;
+        context.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        context.lineWidth = 1.5;
+        context.stroke();
+
+        context.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+        context.lineWidth = 3;
+        context.beginPath();
+        if (this.type === 'triangle-left') {
+            context.moveTo(this.x + this.width * 0.18, this.y + this.height * 0.3);
+            context.lineTo(this.x + this.width * 0.82, this.y + this.height * 0.85);
+        } else {
+            context.moveTo(this.x + this.width * 0.82, this.y + this.height * 0.3);
+            context.lineTo(this.x + this.width * 0.18, this.y + this.height * 0.85);
+        }
+        context.stroke();
+
+        context.fillStyle = 'rgba(255, 255, 255, 0.22)';
+        context.beginPath();
+        if (this.type === 'triangle-left') {
+            context.moveTo(this.x, this.y);
+            context.lineTo(this.x + this.width * 0.45, this.y + this.height * 0.45);
+            context.lineTo(this.x, this.y + this.height * 0.45);
+        } else {
+            context.moveTo(this.x + this.width, this.y);
+            context.lineTo(this.x + this.width, this.y + this.height * 0.45);
+            context.lineTo(this.x + this.width * 0.55, this.y + this.height * 0.45);
+        }
+        context.closePath();
+        context.fill();
     }
 
     checkCollision(player) {

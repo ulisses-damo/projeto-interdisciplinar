@@ -1,702 +1,431 @@
-# 📚 Documentação Técnica - As Aventuras de Maicon
+# Documentacao Tecnica - As Aventuras de Maicon
 
-## 📋 Índice
-1. [Visão Geral](#visão-geral)
-2. [Arquitetura do Sistema](#arquitetura-do-sistema)
-3. [Tecnologias Utilizadas](#tecnologias-utilizadas)
-4. [Estrutura do Projeto](#estrutura-do-projeto)
-5. [Requisitos Funcionais](#requisitos-funcionais)
-6. [Requisitos Não-Funcionais](#requisitos-não-funcionais)
-7. [Componentes Técnicos](#componentes-técnicos)
-8. [Sistema de Renderização](#sistema-de-renderização)
-9. [Sistema de Animação](#sistema-de-animação)
-10. [Sistema de Física](#sistema-de-física)
-11. [Sistema de Colisão](#sistema-de-colisão)
-12. [Guia de Instalação](#guia-de-instalação)
-
----
-
-## 🎮 Visão Geral
-
-**As Aventuras de Maicon** é um jogo de plataforma 2D desenvolvido com tecnologias web nativas (HTML5, CSS3 e JavaScript). O jogo apresenta mecânicas clássicas de plataforma com rolagem infinita vertical, onde o jogador controla o personagem LULI através de plataformas em constante movimento.
-
-### Conceito do Jogo
-- **Gênero**: Plataforma 2D Infinita
-- **Objetivo**: Alcançar o maior número de plataformas possível sem cair
-- **Modo de Jogo**: Single-player
-- **Perspectiva**: Vista lateral (2D Side-scrolling)
+## Indice
+1. Visao Geral
+2. Avaliacao do Codigo
+3. Arquitetura do Sistema
+4. Tecnologias Utilizadas
+5. Estrutura Atual do Projeto
+6. Niveis e Progressao
+7. Requisitos Funcionais
+8. Requisitos Nao Funcionais
+9. Componentes Tecnicos
+10. Fluxos Principais
+11. Limitacoes e Recomendacoes
+12. Guia de Instalacao e Execucao
 
 ---
 
-## 🏗️ Arquitetura do Sistema
+## Visao Geral
 
-### Padrão Arquitetural
-O projeto utiliza uma arquitetura baseada em **Programação Orientada a Objetos (OOP)** com separação de responsabilidades:
+As Aventuras de Maicon e um jogo de plataforma 2D desenvolvido com HTML5, CSS3 e JavaScript puro, renderizado via Canvas 2D. O projeto evoluiu de um platformer vertical simples para uma estrutura com multiplos niveis tematicos, desbloqueio progressivo, trilhas sonoras por fase, hazards contextuais, power-ups e um nivel especial com progressao invertida.
 
-```
-┌─────────────────────────────────────────┐
-│           Interface do Usuário          │
-│         (HTML + CSS + Canvas)           │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│         Game Loop Principal             │
-│        (game_fixed.js)                  │
-│  ┌─────────────────────────────────┐   │
-│  │  • Inicialização                │   │
-│  │  • Update Logic                 │   │
-│  │  • Render Loop                  │   │
-│  │  • Event Handling               │   │
-│  └─────────────────────────────────┘   │
-└─────┬───────────────────┬───────────────┘
-      │                   │
-┌─────▼──────┐     ┌─────▼──────────┐
-│   Player   │     │   Platform     │
-│   Class    │     │    Class       │
-│(player.js) │     │(platform.js)   │
-└────────────┘     └────────────────┘
-      │                   │
-      └──────────┬────────┘
-                 │
-        ┌────────▼─────────┐
-        │  Utility Layer   │
-        │   (utils.js)     │
-        └──────────────────┘
-```
+### Caracteristicas atuais
+- 5 niveis com temas visuais, musica e dificuldade proprios.
+- Progressao vertical por subida nos niveis 1, 2, 3 e 5.
+- Progressao vertical por descida no nivel 4, com barreira de morte no topo.
+- Plataformas normais, plataformas que desmoronam e plataformas triangulares escorregadias.
+- Power-ups a partir do nivel 3: escudo, vida extra e pulo duplo.
+- Lava como hazard nos niveis 3 e 5.
+- Seletor de niveis com desbloqueio persistido em `localStorage`.
+- Tela inicial, HUD dinamica, tela de conclusao de nivel e game over com as acoes Tentar novamente e Escolher nivel.
 
-### Fluxo de Dados
-```
-User Input → Event Listeners → Game State Update → 
-Physics Calculation → Collision Detection → 
-Sprite Animation → Canvas Rendering → Display
-```
+### Objetivo de jogo
+O jogador deve tocar um numero alvo de plataformas unicas para concluir o nivel atual e desbloquear o proximo. O risco principal varia por fase: queda fora da area segura, plataformas instaveis, lava e dificuldade crescente de navegacao.
 
 ---
 
-## 💻 Tecnologias Utilizadas
+## Avaliacao do Codigo
 
-### Core Technologies
-| Tecnologia | Versão | Finalidade |
-|------------|--------|------------|
-| **HTML5** | - | Estrutura da aplicação e Canvas API |
-| **CSS3** | - | Estilização, animações e transições |
-| **JavaScript (ES6+)** | ES2015+ | Lógica do jogo e manipulação do DOM |
-| **Canvas API** | HTML5 | Renderização 2D de gráficos |
+### Pontos fortes
+- A separacao por responsabilidade esta boa para um projeto sem framework: `game_fixed.js` orquestra o loop principal, enquanto nivel, camera, geracao, power-ups, audio e UI ficam encapsulados em modulos especificos.
+- A extensibilidade de gameplay melhorou bastante. O codigo ja suporta tipos diferentes de plataforma, niveis com direcoes opostas de progressao e hazards por fase sem reescrever o loop principal.
+- O fluxo de update e renderizacao esta claro e previsivel: input, fisica, colisao, hazards, reciclagem de plataformas e render.
+- O uso de `localStorage` para niveis desbloqueados e de Howler.js para audio deixa a experiencia mais completa sem adicionar infraestrutura complexa.
 
-### APIs e Recursos Web
-- **Canvas 2D Context**: Renderização de sprites e elementos visuais
-- **RequestAnimationFrame**: Loop de jogo suave (60 FPS)
-- **DOM Events**: Captura de inputs do teclado
-- **CSS Grid/Flexbox**: Layout responsivo
-- **CSS Animations**: Animações da tela inicial
+### Pontos de atencao
+- O projeto depende fortemente de estado global mutavel e da ordem de carregamento das `script tags`. Isso funciona para um jogo pequeno, mas aumenta o acoplamento entre modulos.
+- Ainda ha inconsistencias pontuais de configuracao: `player.js` carrega `LULI.png`, mas a mensagem de erro ainda menciona outro arquivo; `lavaManager.js` mantem configuracao para o nivel 4 mesmo com a lava desativada nessa fase.
+- O HTML possui muitos estilos inline na tela principal e no game over, o que reduz a manutenibilidade visual e dificulta padronizacao com o restante do CSS.
+- Nao ha testes automatizados, lint formal nem pipeline de validacao. Mudancas de gameplay dependem quase totalmente de teste manual.
 
-### Ferramentas de Desenvolvimento
-- **Piskel**: Editor de pixel art para criação de sprites
-- **VS Code**: Editor de código
-- **Git**: Controle de versão
+### Avaliacao geral
+O codigo esta em um bom ponto para um jogo academico em JavaScript puro: legivel, funcional e com modulos bem identificados. O principal debito tecnico nao esta na complexidade do gameplay, mas na falta de uma camada de validacao automatica e no acoplamento por escopo global.
 
 ---
 
-## 📁 Estrutura do Projeto
+## Arquitetura do Sistema
 
-```
-infinite-platformer/
-│
-├── assets/                      # Recursos multimídia
-│   ├── LULI.png                # Spritesheet do personagem (128x128px, grade 2x2)
-│   ├── mario.png               # (Arquivo legado)
-│   ├── Maicon.piskel           # Arquivo fonte do Piskel
-│   └── sounds/                 # Diretório para efeitos sonoros
-│
-├── src/                         # Código fonte
-│   ├── index.html              # Documento HTML principal
-│   │
-│   ├── styles/
-│   │   └── style.css           # Estilos globais (629 linhas)
-│   │       ├── Tela inicial    # Animações e layout da tela de início
-│   │       ├── Tela de jogo    # Estilização do canvas e HUD
-│   │       └── Game Over       # Modal de fim de jogo
-│   │
-│   └── scripts/
-│       ├── game_fixed.js       # Loop principal e gerenciamento (330 linhas)
-│       │   ├── Inicialização do jogo
-│       │   ├── Criação de plataformas
-│       │   ├── Game Loop (update/render)
-│       │   ├── Sistema de colisão
-│       │   ├── Reposicionamento de plataformas
-│       │   └── Controles de input
-│       │
-│       ├── player.js           # Classe Player (81 linhas)
-│       │   ├── Propriedades do jogador
-│       │   ├── Sistema de animação de sprites
-│       │   ├── Mecânica de pulo
-│       │   └── Renderização com flip horizontal
-│       │
-│       ├── platform.js         # Classe Platform (40 linhas)
-│       │   ├── Propriedades das plataformas
-│       │   ├── Renderização com cantos arredondados
-│       │   └── Detecção de colisão
-│       │
-│       └── utils.js            # Funções utilitárias (27 linhas)
-│           ├── getRandomInt()
-│           ├── detectCollision()
-│           ├── clamp()
-│           └── lerp()
-│
-├── README.md                    # Documentação básica
-└── DOCUMENTACAO.md             # Esta documentação técnica
-```
+### Estilo arquitetural
+O projeto segue um modelo de aplicacao estatico em pagina unica, com modulos JavaScript carregados diretamente pelo HTML. O jogo usa uma combinacao de:
+- classes para entidades de mundo, como `Player` e `Platform`;
+- objetos singleton para servicos de runtime, como `LevelManager`, `Camera`, `PlatformGenerator`, `PowerUpManager`, `LavaManager`, `SoundManager` e `UIManager`;
+- um loop central em `game_fixed.js` para atualizar e desenhar o estado do jogo.
+
+### Fluxo de inicializacao
+1. O HTML carrega os scripts em ordem fixa.
+2. `DOMContentLoaded` inicializa som e UI.
+3. A UI abre o seletor de niveis.
+4. Ao escolher um nivel, `init(level)` reseta os sistemas e cria o estado da fase.
+5. `requestAnimationFrame` passa a executar o loop principal.
+
+### Fluxo do loop principal
+1. Atualizar posicao do jogador.
+2. Atualizar animacao do sprite.
+3. Resolver colisao com plataformas.
+4. Aplicar gravidade.
+5. Atualizar camera.
+6. Atualizar power-ups e hazards.
+7. Reciclar e gerar plataformas futuras.
+8. Verificar condicoes de game over ou conclusao.
+9. Renderizar mundo e HUD.
 
 ---
 
-## ✅ Requisitos Funcionais
+## Tecnologias Utilizadas
 
-### RF01 - Movimentação do Personagem
-**Descrição**: O jogador deve poder mover o personagem horizontalmente usando as setas do teclado.
-- **Entrada**: Teclas ArrowLeft (←) e ArrowRight (→)
-- **Comportamento**: Velocidade constante de 3 pixels/frame
-- **Restrição**: Não pode sair dos limites horizontais do canvas
+### Core
+| Tecnologia | Uso atual |
+| --- | --- |
+| HTML5 | Estrutura da tela inicial, canvas, overlays e HUD |
+| CSS3 | Layout, animacoes, temas visuais e responsividade basica |
+| JavaScript ES6+ | Gameplay, estado do jogo, UI e persistencia |
+| Canvas 2D API | Renderizacao do jogador, plataformas, lava e power-ups |
 
-### RF02 - Mecânica de Pulo
-**Descrição**: O jogador deve poder fazer o personagem pular usando a tecla espaço.
-- **Entrada**: Tecla Space
-- **Comportamento**: 
-  - Velocidade inicial de pulo: -13 pixels/frame
-  - Só pode pular quando está sobre uma plataforma
-  - Sujeito à gravidade (0.4 pixels/frame²)
-- **Velocidade máxima de queda**: 12 pixels/frame
+### Bibliotecas e APIs
+| Recurso | Uso atual |
+| --- | --- |
+| Howler.js | Musica de fundo por nivel |
+| `requestAnimationFrame` | Loop principal em ~60 FPS |
+| `localStorage` | Persistencia dos niveis desbloqueados |
+| DOM Events | Entrada do teclado e interacoes de UI |
 
-### RF03 - Sistema de Plataformas Infinitas
-**Descrição**: As plataformas devem ser geradas e reposicionadas dinamicamente.
-- **Quantidade inicial**: 12 plataformas
-- **Dimensões**: 100x20 pixels
-- **Gap vertical**: 125 pixels entre plataformas
-- **Distância horizontal**: 50-110 pixels (aleatória)
-- **Comportamento**: Quando uma plataforma sai da tela, é reposicionada no topo
-
-### RF04 - Detecção de Colisão
-**Descrição**: O sistema deve detectar quando o personagem pousa sobre uma plataforma.
-- **Método**: Verificação de sobreposição de hitboxes
-- **Requisito**: O personagem deve estar caindo (velocityY > 0)
-- **Tolerância**: ±20 pixels no eixo Y para melhor jogabilidade
-
-### RF05 - Sistema de Pontuação
-**Descrição**: O jogo deve contar quantas plataformas únicas o jogador alcançou.
-- **Display**: Contador no canto superior direito
-- **Formato**: "Plataformas: X"
-- **Cor**: Amarelo (#FFD700)
-- **Atualização**: Em tempo real ao tocar nova plataforma
-
-### RF06 - Animação do Personagem
-**Descrição**: O sprite do personagem deve animar durante o jogo.
-- **Frames**: 3 frames de animação
-- **Taxa**: ~2.4 FPS (25 frames do jogo por frame de sprite)
-- **Organização**: Spritesheet em grade 2x2 (128x128px total)
-- **Comportamento**: Animação contínua independente do movimento
-
-### RF07 - Flip Horizontal
-**Descrição**: O personagem deve virar de acordo com a direção do movimento.
-- **Direita**: Sprite normal
-- **Esquerda**: Sprite espelhado horizontalmente
-- **Método**: Canvas scale(-1, 1)
-
-### RF08 - Tela Inicial
-**Descrição**: Apresentar uma tela de boas-vindas antes de iniciar o jogo.
-- **Elementos**:
-  - Título do jogo com animação
-  - Avatar do personagem
-  - Botão "Iniciar"
-  - Elementos decorativos (nuvens, árvores, plataformas)
-- **Transição**: Fade out/in suave (0.5s)
-
-### RF09 - Game Over
-**Descrição**: Detectar quando o jogador cai da tela e exibir tela de fim de jogo.
-- **Condição**: player.y > canvas.height
-- **Display**: Modal centralizado
-- **Informações**: Pontuação final
-- **Ação**: Botão para reiniciar o jogo
-
-### RF10 - Rolagem da Tela
-**Descrição**: As plataformas devem se mover para baixo após o jogador alcançar certa altura.
-- **Trigger**: Ao alcançar a 3ª plataforma
-- **Velocidade**: 1 pixel/frame
-- **Comportamento**: Todas as plataformas movem simultaneamente
+### Observacoes de execucao
+- O projeto nao usa bundler.
+- O HTML carrega Howler por CDN.
+- Existe `package.json` na raiz do workspace com a dependencia `howler`, mas a execucao da versao atual do jogo continua baseada em arquivo estatico + CDN.
 
 ---
 
-## 🔒 Requisitos Não-Funcionais
+## Estrutura Atual do Projeto
 
-### RNF01 - Performance
-**Descrição**: O jogo deve manter taxa de quadros estável.
-- **Taxa de quadros**: 60 FPS
-- **Método**: RequestAnimationFrame
-- **Otimização**: Renderização apenas de elementos visíveis
-- **Métrica**: Sem quedas perceptíveis de FPS durante gameplay normal
+```text
+projeto-interdisciplinar/
+|-- package.json
+`-- infinite-platformer/
+    |-- DOCUMENTACAO.md
+    |-- README.md
+    |-- assets/
+    |   |-- LULI.png
+    |   `-- sounds/
+    `-- src/
+        |-- index.html
+        |-- styles/
+        |   `-- style.css
+        `-- scripts/
+            |-- camera.js
+            |-- game_fixed.js
+            |-- lavaManager.js
+            |-- levelManager.js
+            |-- platform.js
+            |-- platformGenerator.js
+            |-- player.js
+            |-- powerUpManager.js
+            |-- soundManager.js
+            |-- uiManager.js
+            `-- utils.js
+```
 
-### RNF02 - Compatibilidade
-**Descrição**: O jogo deve funcionar em navegadores modernos.
-- **Navegadores suportados**:
-  - Chrome 90+
-  - Firefox 88+
-  - Edge 90+
-  - Safari 14+
-- **Resolução mínima**: 1024x768 pixels
-- **Canvas**: 800x600 pixels fixo
-
-### RNF03 - Responsividade Visual
-**Descrição**: A interface deve se adaptar a diferentes tamanhos de tela.
-- **Layout**: Flexbox/Grid responsivo
-- **Canvas**: Dimensões fixas com centralização
-- **Elementos**: Escala proporcional em telas maiores
-
-### RNF04 - Tempo de Carregamento
-**Descrição**: Os recursos devem carregar rapidamente.
-- **Sprites**: < 50KB cada
-- **Tempo total**: < 2 segundos em conexão padrão
-- **Fallback**: Retângulo colorido enquanto sprite carrega
-
-### RNF05 - Usabilidade
-**Descrição**: Controles devem ser intuitivos e responsivos.
-- **Latência de input**: < 16ms (1 frame)
-- **Feedback visual**: Imediato
-- **Instruções**: Claramente exibidas na tela
-
-### RNF06 - Manutenibilidade
-**Descrição**: Código deve ser organizado e documentado.
-- **Padrão**: OOP com classes separadas
-- **Comentários**: Funções complexas documentadas
-- **Nomenclatura**: CamelCase para variáveis, PascalCase para classes
-- **Modularidade**: Separação por responsabilidade
-
-### RNF07 - Escalabilidade
-**Descrição**: Facilidade para adicionar novos recursos.
-- **Arquitetura**: Desacoplada
-- **Classes**: Extensíveis
-- **Sistema de plataformas**: Suporta novos tipos facilmente
-
-### RNF08 - Acessibilidade
-**Descrição**: Interface deve ter bom contraste e legibilidade.
-- **Contraste**: Ratio mínimo 4.5:1 (WCAG AA)
-- **Fontes**: Tamanhos legíveis (mín. 1.1em)
-- **Cores**: Paleta consistente e harmoniosa
+### Responsabilidade por modulo
+| Arquivo | Responsabilidade principal |
+| --- | --- |
+| `game_fixed.js` | Loop principal, inicializacao, update, render, input e integracao entre sistemas |
+| `player.js` | Entidade do jogador e renderizacao do sprite |
+| `platform.js` | Tipos de plataforma, render e comportamento especial |
+| `camera.js` | Scroll vertical, visibilidade, reciclagem e death barrier |
+| `levelManager.js` | Metadados de nivel, tema, persistencia e meta por fase |
+| `platformGenerator.js` | Criacao inicial, reciclagem e buffer preditivo de plataformas |
+| `lavaManager.js` | Spawn, movimento, colisao e renderizacao de lava |
+| `powerUpManager.js` | Spawn, coleta, duracao e efeitos de power-up |
+| `soundManager.js` | Preload, reproducao e troca de trilha sonora |
+| `uiManager.js` | Fluxos de tela inicial, seletor, fim de nivel e game over |
+| `utils.js` | Colisao e funcoes utilitarias gerais |
 
 ---
 
-## 🧩 Componentes Técnicos
+## Niveis e Progressao
 
-### 1. Canvas API
-**Dimensões**: 800x600 pixels
-**Contexto**: 2D (`CanvasRenderingContext2D`)
+### Matriz de niveis
+| Nivel | Tema | Direcao | Meta de plataformas | Riscos principais | Destaques |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Ceu Azul | Subida | 50 | Queda pela parte inferior | Introducao ao loop basico |
+| 2 | Deserto | Subida | 75 | Queda e plataformas que desmoronam | Inicio da variacao de plataformas |
+| 3 | Vulcao | Subida | 75 | Lava vinda de cima, queda, crumble | Inicio dos power-ups |
+| 4 | Noite | Descida | 100 | Barreira de morte acima, triangulos escorregadios, crumble | Nivel invertido e exclusivo |
+| 5 | Galaxia | Subida | 120 | Lava vinda de cima, queda, crumble mais frequente | Fase mais densa e dificil |
 
-```javascript
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-```
+### Regras de progressao
+- O jogo inicia com apenas o nivel 1 desbloqueado.
+- Ao concluir um nivel, o proximo e liberado automaticamente.
+- O progresso de desbloqueio fica salvo em `localStorage` com a chave `maicon_unlocked_levels`.
+- A conclusao de um nivel depende da quantidade de plataformas unicas tocadas, nao de um ponto final do mapa.
 
-**Métodos Utilizados**:
-- `clearRect()`: Limpa o canvas a cada frame
-- `fillRect()`: Desenha retângulos (fallback)
-- `drawImage()`: Renderiza sprites
-- `fillText()`: Renderiza texto
-- `save()/restore()`: Salva/restaura estado do contexto
-- `translate()`: Move origem do contexto
-- `scale()`: Escala desenhos (flip horizontal)
-
-### 2. Classe Player
-
-**Propriedades**:
-```javascript
-{
-  x: Number,              // Posição X (pixels)
-  y: Number,              // Posição Y (pixels)
-  width: 64,              // Largura (pixels)
-  height: 64,             // Altura (pixels)
-  velocityX: Number,      // Velocidade horizontal (-3, 0, ou 3)
-  velocityY: Number,      // Velocidade vertical (afetada por gravidade)
-  isJumping: Boolean,     // Estado de pulo
-  facingLeft: Boolean,    // Direção que está olhando
-  
-  // Animação
-  frameWidth: 64,         // Largura do frame no spritesheet
-  frameHeight: 64,        // Altura do frame no spritesheet
-  totalFrames: 3,         // Total de frames na animação
-  currentFrame: Number,   // Frame atual (0-2)
-  frameCounter: Number,   // Contador para delay
-  frameDelay: 25,         // Frames de jogo por frame de sprite
-  framesPerRow: 2         // Organização do spritesheet
-}
-```
-
-**Métodos**:
-- `jump()`: Aplica velocidade vertical negativa
-- `render(ctx)`: Desenha o sprite no canvas
-
-### 3. Classe Platform
-
-**Propriedades**:
-```javascript
-{
-  x: Number,              // Posição X
-  y: Number,              // Posição Y
-  width: 100,             // Largura padrão
-  height: 20,             // Altura padrão
-  color: String,          // Cor (hex ou nome)
-  id: Number              // Identificador único
-}
-```
-
-**Métodos**:
-- `render(ctx)`: Desenha plataforma com cantos arredondados
-- `checkCollision(player)`: Verifica colisão com jogador
-
-### 4. Game Loop
-
-```javascript
-function gameLoop() {
-    if (isGameOver) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);  // Limpa canvas
-    update();                                           // Atualiza lógica
-    render();                                           // Renderiza
-    requestAnimationFrame(gameLoop);                   // Próximo frame
-}
-```
-
-**Taxa de Atualização**: ~60 FPS (16.67ms por frame)
+### Variacoes de plataforma
+- `normal`: plataforma estavel padrao.
+- `crumbling`: plataforma em formato de nuvem que treme e cai depois de ativada.
+- `triangle-left` e `triangle-right`: plataformas inclinadas, exclusivas do nivel 4, que empurram o jogador lateralmente e dificultam permanencia.
 
 ---
 
-## 🎨 Sistema de Renderização
+## Requisitos Funcionais
 
-### Pipeline de Renderização
-```
-1. Clear Canvas (clearRect)
-   ↓
-2. Render Platforms (forEach)
-   ↓
-3. Render Player (sprite animation)
-   ↓
-4. Present Frame
-```
+### RF01 - Tela inicial e entrada no jogo
+O sistema deve apresentar uma tela inicial com botao `Iniciar` e realizar transicao visual para a tela principal do jogo.
 
-### Ordem de Renderização (Z-Index)
-```
-Background (Canvas fill) → 
-Platforms (lowest) → 
-Player (highest) → 
-UI Elements (overlay)
-```
+### RF02 - Selecao e desbloqueio de niveis
+O jogador deve poder escolher niveis desbloqueados em um overlay dedicado. O desbloqueio deve ocorrer progressivamente conforme a conclusao das fases.
 
-### Otimizações
-- **Dirty Rectangle**: Apenas limpa canvas completo (otimização futura possível)
-- **Object Pooling**: Plataformas são reutilizadas (reposicionamento)
-- **Culling**: Elementos fora da tela não são renderizados (futuro)
+### RF03 - Persistencia local de progresso
+Os niveis desbloqueados devem ser armazenados localmente para permanecerem disponiveis entre sessoes do navegador.
 
----
+### RF04 - Movimento horizontal
+O personagem deve se mover para esquerda e direita com velocidade constante usando `ArrowLeft` e `ArrowRight`, sem sair dos limites do canvas.
 
-## 🎬 Sistema de Animação
+### RF05 - Pulo basico
+O jogador deve poder pular com a tecla `Espaco` apenas quando estiver apoiado em uma plataforma valida.
 
-### Spritesheet
-**Arquivo**: `LULI.png`
-**Dimensões**: 128x128 pixels
-**Organização**: Grade 2x2
-**Frames**: 3 (posições: [0,0], [1,0], [0,1])
+### RF06 - Gravidade e queda
+O personagem deve estar sujeito a gravidade constante e a uma velocidade terminal de queda para manter previsibilidade no controle.
 
-```
-┌─────────┬─────────┐
-│ Frame 0 │ Frame 1 │  64x64 cada
-├─────────┼─────────┤
-│ Frame 2 │ (vazio) │
-└─────────┴─────────┘
-```
+### RF07 - Pulo duplo por power-up
+Quando o power-up `doubleJump` estiver ativo, o jogador deve poder executar um segundo pulo no ar antes de tocar novamente o solo.
 
-### Lógica de Animação
-```javascript
-// A cada update do jogo:
-frameCounter++;
-if (frameCounter >= frameDelay) {
-    frameCounter = 0;
-    currentFrame = (currentFrame + 1) % totalFrames;  // 0→1→2→0
-}
-```
+### RF08 - Geracao infinita de plataformas
+As plataformas devem ser geradas dinamicamente e recicladas durante a fase, mantendo buffer suficiente a frente do jogador.
 
-### Cálculo de Posição do Frame
-```javascript
-const col = currentFrame % framesPerRow;           // Coluna no grid
-const row = Math.floor(currentFrame / framesPerRow); // Linha no grid
-const frameX = col * frameWidth;                    // Posição X em pixels
-const frameY = row * frameHeight;                   // Posição Y em pixels
-```
+### RF09 - Progressao vertical por nivel
+O sistema deve suportar niveis com progressao por subida e um nivel com progressao por descida, com camera e condicao de morte adequadas ao modo.
 
-### Renderização do Sprite
-```javascript
-ctx.drawImage(
-    spriteSheet,
-    frameX, frameY,                  // Posição no spritesheet
-    frameWidth, frameHeight,          // Tamanho do frame
-    this.x, this.y,                  // Posição no canvas
-    this.width, this.height          // Tamanho renderizado
-);
-```
+### RF10 - Tipos especiais de plataforma
+O jogo deve suportar plataformas que desmoronam e plataformas triangulares escorregadias, com comportamento proprio de colisao e renderizacao.
 
-### Image Rendering
-```css
-image-rendering: pixelated;          /* Mantém estilo pixel art */
-image-rendering: -moz-crisp-edges;   /* Firefox */
-image-rendering: crisp-edges;        /* Padrão */
-```
+### RF11 - Contagem de plataformas unicas
+Cada plataforma tocada pela primeira vez deve incrementar o progresso do nivel. A HUD deve mostrar a contagem atual e a meta da fase.
+
+### RF12 - Conclusao de nivel
+Ao atingir a meta de plataformas unicas, o jogo deve encerrar a fase, liberar o proximo nivel quando existir e exibir overlay de conclusao.
+
+### RF13 - Sistema de hazards por nivel
+O jogo deve suportar hazards especificos por fase. Atualmente a lava esta ativa nos niveis 3 e 5 e desativada no nivel 4.
+
+### RF14 - Sistema de power-ups
+O sistema deve gerar, renderizar, permitir coleta e aplicar efeitos temporarios ou consumiveis para escudo, vida extra e pulo duplo a partir do nivel 3.
+
+### RF15 - Audio por nivel
+Cada fase deve possuir uma trilha sonora propria, trocada automaticamente na entrada do nivel e interrompida em game over ou conclusao.
+
+### RF16 - Feedback visual de estado
+O jogo deve exibir HUD com contador de plataformas, nivel atual e indicador de power-up ativo.
+
+### RF17 - Game over com acoes imediatas
+Ao perder, o sistema deve exibir a pontuacao da tentativa e oferecer as acoes `Tentar novamente` e `Escolher nivel`.
+
+### RF18 - Renderizacao do personagem animado
+O personagem deve animar continuamente e virar de lado conforme a direcao horizontal atual.
 
 ---
 
-## ⚙️ Sistema de Física
+## Requisitos Nao Funcionais
 
-### Gravidade
-```javascript
-const gravity = 0.4;  // pixels/frame²
+### RNF01 - Performance visual
+O jogo deve manter atualizacao fluida com `requestAnimationFrame`, buscando experiencia proxima de 60 FPS em navegadores desktop modernos.
 
-// Aplicada a cada frame:
-player.velocityY += gravity;
-player.y += player.velocityY;
+### RNF02 - Simplicidade de deploy
+O projeto deve funcionar como aplicacao estatica, executavel via servidor HTTP simples, sem etapa obrigatoria de build.
 
-// Velocidade terminal:
-if (player.velocityY > 12) player.velocityY = 12;
-```
+### RNF03 - Compatibilidade com navegadores modernos
+O jogo deve operar corretamente em Chrome, Edge, Firefox e navegadores equivalentes com suporte a Canvas 2D, `localStorage` e ES6.
 
-### Pulo
-```javascript
-player.velocityY = -13;  // Impulso inicial
-// Gravidade desacelera até velocityY = 0 (ápice do pulo)
-// Depois acelera para baixo
-```
+### RNF04 - Manutenibilidade modular
+A logica deve permanecer separada em modulos por responsabilidade para facilitar extensao de fases, hazards e tipos de plataforma.
 
-### Movimento Horizontal
-```javascript
-// Sem aceleração/desaceleração
-velocityX = 3;   // Direita
-velocityX = -3;  // Esquerda
-velocityX = 0;   // Parado
+### RNF05 - Persistencia local leve
+O estado persistido deve ser pequeno, simples e limitado ao essencial da progressao do jogador.
 
-// Aplicado diretamente:
-player.x += player.velocityX;
-```
+### RNF06 - Observabilidade minima
+Falhas de carregamento de asset devem produzir algum feedback, como fallback visual ou mensagem de console, para facilitar depuracao manual.
 
-### Cálculos de Alcance
+### RNF07 - Extensibilidade de gameplay
+O projeto deve continuar permitindo novos niveis, power-ups, hazards e temas sem exigir reestruturacao completa do loop principal.
 
-**Altura Máxima do Pulo**:
-```
-h = v₀² / (2g)
-h = 13² / (2 × 0.4)
-h ≈ 211 pixels
-```
+### RNF08 - Legibilidade de interface
+A HUD e os overlays devem permanecer legiveis sobre fundos variados por meio de contraste, tipografia destacada e estrutura visual consistente.
 
-**Tempo no Ar**:
-```
-t = 2v₀ / g
-t = 2 × 13 / 0.4
-t = 65 frames (≈ 1.08 segundos a 60 FPS)
-```
+### RNF09 - Audio pre-carregado
+As trilhas devem ser pre-carregadas no inicio para reduzir latencia perceptivel durante troca de nivel.
 
-**Distância Horizontal Máxima**:
-```
-d = velocityX × tempo
-d = 3 × 65
-d = 195 pixels
-```
+### RNF10 - Validacao manual viavel
+Mesmo sem testes automatizados, o codigo deve permanecer organizado o suficiente para permitir verificacao manual rapida por arquivo e por sistema.
 
 ---
 
-## 💥 Sistema de Colisão
+## Componentes Tecnicos
 
-### Detecção de Colisão (AABB - Axis-Aligned Bounding Box)
+### 1. Loop principal
+`game_fixed.js` controla o ciclo `init -> update -> render` e integra todos os managers.
 
-```javascript
-function detectCollision(rect1, rect2) {
-    // Sobreposição horizontal
-    const horizontalOverlap = 
-        rect1.x < rect2.x + rect2.width && 
-        rect1.x + rect1.width > rect2.x;
-    
-    // Posição dos pés do player
-    const feetY = rect1.y + rect1.height;
-    const platformTop = rect2.y;
-    
-    // Player deve estar caindo
-    const isFalling = rect1.velocityY > 0;
-    
-    // Pés na altura da plataforma (tolerância)
-    const feetOnTop = feetY > platformTop - 10 && 
-                      feetY < platformTop + 20;
-    
-    return horizontalOverlap && feetOnTop && isFalling;
-}
-```
+Responsabilidades principais:
+- resetar estado de fase;
+- criar jogador e plataformas iniciais;
+- processar movimento, gravidade, colisao e hazards;
+- reciclar plataformas e manter buffer futuro;
+- decidir game over e conclusao.
 
-### Resolução de Colisão
-```javascript
-if (detectCollision(player, platform)) {
-    player.y = platform.y - player.height;  // Snap para topo
-    player.velocityY = 0;                    // Para movimento vertical
-    player.isJumping = false;                // Permite pular novamente
-}
-```
+### 2. Sistema de niveis
+`levelManager.js` concentra:
+- nome, tema e cor de cada fase;
+- quantidade alvo de plataformas;
+- modo vertical (`up` ou `down`);
+- carga e persistencia dos niveis desbloqueados;
+- atualizacao da HUD e indicador de fase.
 
-### Tolerância de Colisão
-- **Superior**: -10 pixels (permite cair através se muito acima)
-- **Inferior**: +20 pixels (perdoa pequenas penetrações)
-- **Objetivo**: Melhorar jogabilidade e evitar bugs visuais
+### 3. Sistema de camera
+`camera.js` suporta dois comportamentos:
+- modo de subida: a camera sobe suavemente e a morte ocorre abaixo da tela;
+- modo de descida: a camera acompanha para baixo e a morte ocorre acima da tela.
+
+### 4. Geracao de plataformas
+`platformGenerator.js` usa geracao por camadas com distribuicao horizontal por zonas.
+
+Mecanismos relevantes:
+- buffer frontal configuravel;
+- predicao da queda do jogador para gerar plataformas a frente;
+- reciclagem de plataformas antigas fora da area util;
+- escolha dinamica do tipo de plataforma por nivel.
+
+### 5. Entidade jogador
+`player.js` representa o avatar e contem:
+- posicao e velocidade;
+- estado de pulo;
+- orientacao horizontal;
+- animacao por spritesheet 2x2 com 3 frames utilizados.
+
+### 6. Sistema de colisao
+`utils.js` calcula colisao horizontal e verifica se os pes do jogador estao na altura da superficie da plataforma. Para plataformas triangulares, a superficie e calculada dinamicamente pela funcao `getSurfaceYAt`.
+
+### 7. Power-ups
+`powerUpManager.js` gerencia:
+- spawn em plataformas visiveis;
+- coleta por proximidade radial;
+- duracao e consumo dos efeitos;
+- HUD do poder ativo;
+- efeitos visuais aplicados ao jogador.
+
+### 8. Lava
+`lavaManager.js` gerencia spawn, movimento e colisao das gotas de lava. No estado atual:
+- nivel 3: lava vindo de cima;
+- nivel 4: lava desativada;
+- nivel 5: lava vindo de cima.
+
+### 9. Audio
+`soundManager.js` usa Howler.js para:
+- pre-carregar trilhas por nivel;
+- tocar, pausar, retomar e parar musicas;
+- ajustar volume global.
+
+### 10. UI
+`uiManager.js` controla:
+- tela inicial;
+- seletor de niveis;
+- overlay de fim de nivel;
+- overlay de game over;
+- acoes de reinicio da fase atual ou retorno ao seletor.
 
 ---
 
-## 📦 Guia de Instalação
+## Fluxos Principais
 
-### Pré-requisitos
-- Navegador moderno (Chrome 90+, Firefox 88+, Edge 90+, Safari 14+)
-- Servidor web local (opcional, mas recomendado)
-  - Python: `python -m http.server 8000`
-  - Node.js: `npx http-server`
-  - VS Code: Live Server Extension
+### Fluxo de fase
+1. Jogador escolhe um nivel.
+2. O sistema reseta camera, plataformas, lava, power-ups e contadores.
+3. O gerador cria o conjunto inicial de plataformas.
+4. O jogo inicia a musica da fase.
+5. O loop principal processa gameplay ate a conclusao ou derrota.
 
-### Instalação Local
+### Fluxo de conclusao
+1. O jogador toca a quantidade alvo de plataformas unicas.
+2. A musica e interrompida.
+3. O proximo nivel e desbloqueado, quando houver.
+4. O overlay de conclusao aparece.
+5. O seletor de niveis e exibido novamente apos o tempo de transicao.
 
-1. **Clone o repositório**:
+### Fluxo de derrota
+1. O jogador toca um hazard letal ou cruza a barreira de morte.
+2. A musica e interrompida.
+3. O overlay de game over mostra fase e progresso da tentativa.
+4. O jogador pode tentar novamente ou voltar ao seletor.
+
+---
+
+## Limitacoes e Recomendacoes
+
+### Limitacoes atuais
+- Nao ha testes automatizados.
+- A arquitetura depende de escopo global e ordem de carregamento dos scripts.
+- Parte da interface ainda usa estilos inline no HTML.
+- Existem pequenas inconsistencias de manutencao, como mensagens de erro e configuracoes que nao refletem 100% o uso atual.
+
+### Recomendacoes tecnicas
+1. Consolidar configuracoes de gameplay em arquivos ou objetos dedicados por nivel.
+2. Migrar estilos inline do HTML para `style.css`.
+3. Criar um checklist de regressao manual por nivel para validar camera, hazards, power-ups e game over a cada mudanca.
+4. Corrigir pequenas inconsistencias de configuracao, como o caminho do erro do sprite e a configuracao inutilizada da lava no nivel 4.
+5. Considerar modularizacao via ES Modules no futuro para reduzir acoplamento global.
+
+---
+
+## Guia de Instalacao e Execucao
+
+### Pre-requisitos
+- Navegador moderno com suporte a Canvas 2D.
+- Servidor HTTP simples local.
+
+### Estrategias de execucao
+
+Opcao 1:
+
 ```bash
-git clone https://github.com/ulisses-damo/projeto-interdisciplinar.git
-cd projeto-interdisciplinar/infinite-platformer
-```
-
-2. **Verifique a estrutura**:
-```bash
-├── assets/
-│   └── Maicon.png          # Deve existir
-├── src/
-│   ├── index.html
-│   ├── styles/
-│   │   └── style.css
-│   └── scripts/
-│       ├── game_fixed.js
-│       ├── player.js
-│       ├── platform.js
-│       └── utils.js
-```
-
-3. **Inicie um servidor local**:
-```bash
-# Opção 1: Python
+cd infinite-platformer/src
 python -m http.server 8000
+```
 
-# Opção 2: Node.js
+Opcao 2:
+
+```bash
+cd infinite-platformer/src
 npx http-server -p 8000
-
-# Opção 3: VS Code Live Server
-# Clique direito em index.html → "Open with Live Server"
 ```
 
-4. **Acesse no navegador**:
+Opcao 3:
+- Abrir `src/index.html` com Live Server no VS Code.
+
+### URL de acesso
+
+```text
+http://localhost:8000/index.html
 ```
-http://localhost:8000/src/index.html
-```
 
-### Verificação de Funcionamento
-
-✅ **Checklist**:
-- [ ] Tela inicial carrega com animações
-- [ ] Avatar do personagem aparece no círculo laranja
-- [ ] Botão "INICIAR" está visível
-- [ ] Ao clicar, transição para tela de jogo
-- [ ] Canvas carrega com fundo gradiente
-- [ ] Personagem aparece animado
-- [ ] Plataformas são visíveis
-- [ ] Setas movem o personagem
-- [ ] Espaço faz pular
-- [ ] Contador de plataformas atualiza
-- [ ] Game Over aparece ao cair
-
-### Troubleshooting
-
-**Problema**: Sprite não carrega
-- **Solução**: Verifique se `LULI.png` está em `assets/`
-- **Solução**: Verifique permissões de arquivo
-- **Solução**: Use servidor web (CORS pode bloquear file://)
-
-**Problema**: Animação não funciona
-- **Solução**: Verifique Console do navegador (F12)
-- **Solução**: Confirme que spritesheet é 128x128px
-- **Solução**: Limpe cache do navegador (Ctrl+Shift+R)
-
-**Problema**: Controles não respondem
-- **Solução**: Clique no canvas para dar foco
-- **Solução**: Verifique se não há erros no Console
+### Checklist de verificacao
+- Tela inicial aparece e transiciona corretamente.
+- Seletor de niveis exibe niveis desbloqueados e bloqueados.
+- Musica troca ao entrar em um nivel.
+- HUD mostra nivel, plataformas e power-up ativo.
+- Nivel 4 inicia em modo de descida.
+- Plataformas triangulares aparecem apenas no nivel 4.
+- Lava aparece apenas nos niveis 3 e 5.
+- Game over oferece Tentar novamente e Escolher nivel.
 
 ---
 
-## 🎮 Controles
-
-| Tecla | Ação |
-|-------|------|
-| **←** | Mover para esquerda |
-| **→** | Mover para direita |
-| **Espaço** | Pular |
-
----
-
-## 📊 Métricas do Projeto
-
-### Linhas de Código
-- **Total**: ~1,067 linhas
-- JavaScript: ~438 linhas
-- CSS: ~629 linhas
-- HTML: ~58 linhas (gerado)
-
-### Complexidade
-- **Classes**: 2 (Player, Platform)
-- **Funções**: ~15 principais
-- **Event Listeners**: 3
-- **Loops principais**: 1 (Game Loop)
-
-### Assets
-- **Sprites**: 1 arquivo (128x128px, ~5KB)
-- **Imagens**: Formato PNG
-- **Audio**: Não implementado
-
----
-
-## 🚀 Melhorias Futuras
-
-### Curto Prazo
-- [ ] Sistema de pontuação highscore (localStorage)
-- [ ] Efeitos sonoros (pulo, colisão, game over)
-- [ ] Música de fundo
-- [ ] Diferentes tipos de plataformas (móveis, quebráveis)
-
-### Médio Prazo
-- [ ] Power-ups colecionáveis
-- [ ] Inimigos
-- [ ] Múltiplos níveis/mundos
-- [ ] Sistema de vidas
-- [ ] Modo de dificuldade
-
-### Longo Prazo
-- [ ] Multiplayer local
-- [ ] Ranking online
-- [ ] Editor de níveis
-- [ ] Mobile responsivo (touch controls)
-- [ ] Progressive Web App (PWA)
-
----
-
-## 👥 Créditos
-
-- **Desenvolvimento**: Projeto Interdisciplinar
-- **Arte**: Sprite LULI criado no Piskel
-- **Repositório**: [github.com/ulisses-damo/projeto-interdisciplinar](https://github.com/ulisses-damo/projeto-interdisciplinar)
-
----
-
-## 📄 Licença
-
-Este projeto é desenvolvido para fins educacionais.
-
----
-
-**Última Atualização**: Novembro 2025
-**Versão**: 1.0.0
+Ultima atualizacao: Abril de 2026
+Documento alinhado ao estado atual do codigo-fonte.
