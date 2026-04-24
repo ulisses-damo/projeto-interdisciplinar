@@ -1,5 +1,5 @@
 // ===== GERENCIADOR DE GOTAS DE LAVA =====
-// Gotas de lava caem do céu em posições aleatórias (nível 3+)
+// Gotas de lava caem do céu em níveis normais e sobem do chão em níveis descendentes
 // Causa game over ao atingir o jogador
 
 const LavaManager = {
@@ -8,8 +8,8 @@ const LavaManager = {
 
     // Configuração por nível
     CONFIG: {
-        3: { spawnInterval: 35, speed: 3.0, size: 10, maxDrops: 8 },
-        4: { spawnInterval: 50, speed: 3.5, size: 11, maxDrops: 12 },
+        3: { spawnInterval: 50, speed: 3.0, size: 10, maxDrops: 8 },
+        4: { spawnInterval: 60, speed: 2.5, size: 11, maxDrops: 10},
         5: { spawnInterval: 50, speed: 3.5, size: 12, maxDrops: 18 },
     },
 
@@ -20,46 +20,52 @@ const LavaManager = {
 
     // Retorna config do nível ou null se lava não está ativa
     _getConfig(level) {
-        if (level < 3) return null;
+        if (level < 3 || level === 4) return null;
         return this.CONFIG[Math.min(level, 5)];
+    },
+
+    _getDirection(level) {
+        return LevelManager.isDescending(level) ? -1 : 1;
     },
 
     // Atualiza: spawna e move gotas
     update(level, canvasWidth, canvasHeight, cameraY) {
         const config = this._getConfig(level);
         if (!config) return;
+        const direction = this._getDirection(level);
 
         // --- Spawn ---
         this.spawnTimer++;
         if (this.spawnTimer >= config.spawnInterval && this.drops.length < config.maxDrops) {
             this.spawnTimer = 0;
-            this._spawnDrop(config, canvasWidth, cameraY);
+            this._spawnDrop(config, canvasWidth, canvasHeight, cameraY, direction);
         }
 
         // --- Mover gotas ---
         for (let i = this.drops.length - 1; i >= 0; i--) {
             const drop = this.drops[i];
-            drop.y += drop.speed;
-            drop.trail.push({ x: drop.x, y: drop.y - drop.size, alpha: 0.6 });
+            drop.y += drop.speed * drop.direction;
+            drop.trail.push({ x: drop.x, y: drop.y - drop.size * drop.direction, alpha: 0.6 });
             if (drop.trail.length > 6) drop.trail.shift();
 
             // Animação de brilho
             drop.glowPhase += 0.1;
 
-            // Remover se saiu muito abaixo da tela
+            // Remover se saiu para fora da tela na direção do movimento
             const screenY = drop.y - cameraY;
-            if (screenY > canvasHeight + 100) {
+            if ((drop.direction > 0 && screenY > canvasHeight + 100) || (drop.direction < 0 && screenY < -100)) {
                 this.drops.splice(i, 1);
             }
         }
     },
 
-    _spawnDrop(config, canvasWidth, cameraY) {
+    _spawnDrop(config, canvasWidth, canvasHeight, cameraY, direction) {
         const margin = 30;
         const x = margin + Math.random() * (canvasWidth - margin * 2);
 
-        // Spawna acima da tela visível
-        const y = cameraY - 20 - Math.random() * 60;
+        const y = direction > 0
+            ? cameraY - 20 - Math.random() * 60
+            : cameraY + canvasHeight + 20 + Math.random() * 60;
 
         this.drops.push({
             x: x,
@@ -67,6 +73,7 @@ const LavaManager = {
             speed: config.speed + (Math.random() - 0.5) * 0.8,
             size: config.size + Math.random() * 4,
             glowPhase: Math.random() * Math.PI * 2,
+            direction,
             trail: [],
         });
     },
@@ -126,10 +133,13 @@ const LavaManager = {
             ctx.globalAlpha = 1;
             const s = drop.size;
 
-            // Gradiente da gota
+            ctx.save();
+            ctx.translate(drop.x, drop.y);
+            ctx.scale(1, drop.direction);
+
             const dropGrad = ctx.createRadialGradient(
-                drop.x - s * 0.2, drop.y - s * 0.3, 0,
-                drop.x, drop.y, s * 1.2
+                -s * 0.2, -s * 0.3, 0,
+                0, 0, s * 1.2
             );
             dropGrad.addColorStop(0, '#FFDD00');
             dropGrad.addColorStop(0.3, '#FF8C00');
@@ -138,17 +148,16 @@ const LavaManager = {
 
             ctx.fillStyle = dropGrad;
             ctx.beginPath();
-            // Forma de gota: ponta para cima, redonda embaixo
-            ctx.moveTo(drop.x, drop.y - s * 1.4);
+            ctx.moveTo(0, -s * 1.4);
             ctx.bezierCurveTo(
-                drop.x - s * 0.8, drop.y - s * 0.2,
-                drop.x - s, drop.y + s * 0.5,
-                drop.x, drop.y + s
+                -s * 0.8, -s * 0.2,
+                -s, s * 0.5,
+                0, s
             );
             ctx.bezierCurveTo(
-                drop.x + s, drop.y + s * 0.5,
-                drop.x + s * 0.8, drop.y - s * 0.2,
-                drop.x, drop.y - s * 1.4
+                s, s * 0.5,
+                s * 0.8, -s * 0.2,
+                0, -s * 1.4
             );
             ctx.closePath();
             ctx.fill();
@@ -157,8 +166,9 @@ const LavaManager = {
             ctx.globalAlpha = 0.6;
             ctx.fillStyle = '#FFEE88';
             ctx.beginPath();
-            ctx.ellipse(drop.x - s * 0.15, drop.y - s * 0.2, s * 0.25, s * 0.35, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(-s * 0.15, -s * 0.2, s * 0.25, s * 0.35, -0.3, 0, Math.PI * 2);
             ctx.fill();
+            ctx.restore();
         }
 
         ctx.restore();
