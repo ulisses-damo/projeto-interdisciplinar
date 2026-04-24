@@ -3,33 +3,40 @@
 
 const Camera = {
     y: 0,                    // Offset da câmera (mundo → tela)
-    highestPlayerY: 0,       // Posição Y mais alta que o jogador alcançou
+    travelMode: 'up',        // 'up' = progresso para cima, 'down' = progresso para baixo
     smooth: 0.08,            // Suavidade da câmera (0-1)
-    targetOffset: 330,       // Jogador fica a ~55% da tela (600 * 0.55)
-    deathMargin: 20,         // Morre logo ao sair da tela por baixo
+    targetOffset: 330,       // Distância do jogador ao topo da tela
+    deathMargin: 20,         // Margem da barreira de morte
 
-    reset(canvasHeight) {
+    reset(canvasHeight, level = LevelManager.currentLevel) {
         this.y = 0;
-        this.highestPlayerY = canvasHeight - 90;
-        this.targetOffset = canvasHeight * 0.55;
+        this.travelMode = LevelManager.isDescending(level) ? 'down' : 'up';
+        this.targetOffset = canvasHeight * (this.travelMode === 'down' ? 0.35 : 0.55);
     },
 
     update(playerY) {
-        // Atualizar ponto mais alto
-        if (playerY < this.highestPlayerY) {
-            this.highestPlayerY = playerY;
+        const targetCameraY = playerY - this.targetOffset;
+
+        if (this.travelMode === 'down') {
+            if (targetCameraY > this.y) {
+                this.y += (targetCameraY - this.y) * this.smooth;
+            }
+            return;
         }
 
-        // Câmera suave: segue o jogador para cima, NUNCA desce
-        const targetCameraY = playerY - this.targetOffset;
         if (targetCameraY < this.y) {
             this.y += (targetCameraY - this.y) * this.smooth;
         }
     },
 
-    // Verifica se o jogador caiu demais e deve morrer
-    isPlayerDead(playerY, canvasHeight) {
-        const playerScreenY = playerY - this.y;
+    // Verifica se o jogador saiu pela barreira mortal do nível
+    isPlayerDead(player, canvasHeight) {
+        const playerScreenY = player.y - this.y;
+
+        if (this.travelMode === 'down') {
+            return playerScreenY + player.height < -this.deathMargin;
+        }
+
         return playerScreenY > canvasHeight + this.deathMargin;
     },
 
@@ -44,9 +51,18 @@ const Camera = {
         return screenY > -margin && screenY < canvasHeight + margin;
     },
 
-    // Verifica se um objeto saiu por baixo da tela
-    isBelowScreen(worldY, canvasHeight, margin = 100) {
+    // Verifica se um objeto saiu da área útil e pode ser reciclado
+    shouldRecycle(worldY, canvasHeight, margin = 100) {
         const screenY = worldY - this.y;
+
+        if (this.travelMode === 'down') {
+            return screenY < -margin;
+        }
+
         return screenY > canvasHeight + margin;
+    },
+
+    isBelowScreen(worldY, canvasHeight, margin = 100) {
+        return this.shouldRecycle(worldY, canvasHeight, margin);
     }
 };
