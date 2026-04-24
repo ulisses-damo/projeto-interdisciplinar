@@ -4,11 +4,11 @@
 const LevelManager = {
     // Configuração visual de cada nível
     LEVELS: {
-        1: { name: 'Céu Azul',  platformColor: '#1E3A8A', bgTop: '#87CEEB', bgMid: '#98d8f0', bgBot: '#7fb069' },
-        2: { name: 'Deserto',   platformColor: '#334155', bgTop: '#FEF3C7', bgMid: '#D97706', bgBot: '#92400E' },
-        3: { name: 'Vulcão',    platformColor: '#FBBF24', bgTop: '#7F1D1D', bgMid: '#991B1B', bgBot: '#450a0a' },
-        4: { name: 'Noite',     platformColor: '#22D3EE', bgTop: '#0f172a', bgMid: '#1e1b4b', bgBot: '#312e81' },
-        5: { name: 'Galáxia',   platformColor: '#F472B6', bgTop: '#0a0015', bgMid: '#140025', bgBot: '#1e0040' },
+        1: { name: 'Céu Azul',  platformColor: '#1E3A8A', bgTop: '#87CEEB', bgMid: '#98d8f0', bgBot: '#7fb069', verticalMode: 'up' },
+        2: { name: 'Deserto',   platformColor: '#334155', bgTop: '#FEF3C7', bgMid: '#D97706', bgBot: '#92400E', verticalMode: 'up' },
+        3: { name: 'Vulcão',    platformColor: '#FBBF24', bgTop: '#7F1D1D', bgMid: '#991B1B', bgBot: '#450a0a', verticalMode: 'up' },
+        4: { name: 'Noite',     platformColor: '#22D3EE', bgTop: '#0f172a', bgMid: '#1e1b4b', bgBot: '#312e81', verticalMode: 'down' },
+        5: { name: 'Galáxia',   platformColor: '#F472B6', bgTop: '#0a0015', bgMid: '#140025', bgBot: '#1e0040', verticalMode: 'up' },
     },
 
     MAX_LEVEL: 5,
@@ -69,6 +69,10 @@ const LevelManager = {
 
     getPlatformColor(level) {
         return this.getTheme(level).platformColor;
+    },
+
+    isDescending(level) {
+        return this.getTheme(level).verticalMode === 'down';
     },
 
     // --- Dificuldade ---
