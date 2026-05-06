@@ -1,0 +1,5 @@
+/* NÍVEL 1: CÉU AZUL */
+
+#gameScreen[data-level="1"] .game-cloud {
+    transition: opacity 1.5s ease;
+}

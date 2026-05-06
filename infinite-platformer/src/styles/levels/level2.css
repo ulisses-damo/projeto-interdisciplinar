@@ -1,0 +1,42 @@
+/* NÍVEL 2: DESERTO */
+
+#gameScreen[data-level="2"] .game-cloud {
+    transition: opacity 1.5s ease;
+}
+
+#gameScreen[data-level="2"]::before {
+    content: '';
+    position: fixed;
+    top: 75px;
+    right: 140px;
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle, rgba(255, 235, 120, 1) 15%, rgba(255, 200, 50, 0.6) 45%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    animation: level2SunPulse 4s ease-in-out infinite;
+}
+
+#gameScreen[data-level="2"]::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 120px;
+    background: linear-gradient(to top, rgba(210, 120, 0, 0.2), transparent);
+    pointer-events: none;
+    z-index: 0;
+    animation: level2HeatWave 3s ease-in-out infinite;
+}
+
+@keyframes level2SunPulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.15); opacity: 1; }
+}
+
+@keyframes level2HeatWave {
+    0%, 100% { opacity: 0.25; transform: scaleY(1); }
+    50% { opacity: 0.55; transform: scaleY(1.08); }
+}

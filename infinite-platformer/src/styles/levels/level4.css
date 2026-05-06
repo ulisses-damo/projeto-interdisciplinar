@@ -1,0 +1,62 @@
+/* NÍVEL 4: NOITE */
+
+#gameScreen[data-level="4"] .game-cloud {
+    opacity: 0 !important;
+    transition: opacity 1.5s ease;
+}
+
+#gameScreen[data-level="4"]::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+        radial-gradient(circle at 3% 6%, rgba(255, 255, 255, 0.95) 0 1px, transparent 1.9px),
+        radial-gradient(circle at 8% 21%, rgba(255, 255, 255, 0.7) 0 1.4px, transparent 2.2px),
+        radial-gradient(circle at 12% 38%, rgba(255, 255, 255, 0.9) 0 1.1px, transparent 2px),
+        radial-gradient(circle at 17% 58%, rgba(255, 255, 255, 0.7) 0 1.3px, transparent 2.1px),
+        radial-gradient(circle at 21% 83%, rgba(255, 255, 255, 0.85) 0 1.5px, transparent 2.3px),
+        radial-gradient(circle at 27% 11%, rgba(255, 255, 255, 0.85) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 33% 29%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 37% 51%, rgba(255, 255, 255, 0.9) 0 1.4px, transparent 2.3px),
+        radial-gradient(circle at 42% 74%, rgba(255, 255, 255, 0.75) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 48% 9%, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 2.4px),
+        radial-gradient(circle at 52% 23%, rgba(255, 255, 255, 0.65) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 57% 43%, rgba(255, 255, 255, 0.82) 0 1.2px, transparent 2.1px),
+        radial-gradient(circle at 62% 67%, rgba(255, 255, 255, 0.72) 0 1.4px, transparent 2.2px),
+        radial-gradient(circle at 68% 88%, rgba(255, 255, 255, 0.9) 0 1.1px, transparent 2px),
+        radial-gradient(circle at 73% 14%, rgba(255, 255, 255, 0.88) 0 1.4px, transparent 2.2px),
+        radial-gradient(circle at 79% 34%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 84% 56%, rgba(255, 255, 255, 0.95) 0 1.5px, transparent 2.4px),
+        radial-gradient(circle at 89% 76%, rgba(255, 255, 255, 0.7) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 95% 18%, rgba(255, 255, 255, 0.82) 0 1.3px, transparent 2.1px),
+        radial-gradient(circle at 97% 47%, rgba(255, 255, 255, 0.7) 0 1.1px, transparent 1.9px),
+        radial-gradient(circle at 5% 95%, rgba(255, 255, 255, 0.8) 0 1.2px, transparent 2px),
+        radial-gradient(circle at 24% 71%, rgba(255, 255, 255, 0.68) 0 1px, transparent 1.8px),
+        radial-gradient(circle at 45% 92%, rgba(255, 255, 255, 0.78) 0 1.3px, transparent 2.1px),
+        radial-gradient(circle at 66% 79%, rgba(255, 255, 255, 0.92) 0 1.1px, transparent 2px),
+        radial-gradient(circle at 88% 91%, rgba(255, 255, 255, 0.75) 0 1.2px, transparent 2px);
+    background-repeat: no-repeat;
+    animation: level4Twinkle 3.2s ease-in-out infinite alternate;
+}
+
+#gameScreen[data-level="4"]::after {
+    content: '';
+    position: fixed;
+    top: 68px;
+    right: 96px;
+    width: 68px;
+    height: 68px;
+    background: radial-gradient(circle at 35% 35%, #FFF9C4, #FFE082);
+    border-radius: 50%;
+    box-shadow: 0 0 18px rgba(255, 249, 196, 0.55), 0 0 60px rgba(255, 224, 130, 0.2);
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes level4Twinkle {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}

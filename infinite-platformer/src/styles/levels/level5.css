@@ -1,0 +1,70 @@
+/* NÍVEL 5: GALÁXIA */
+
+#gameScreen[data-level="5"] .game-cloud {
+    opacity: 0 !important;
+    transition: opacity 1.5s ease;
+}
+
+#gameScreen[data-level="5"]::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow:
+        40px 25px #F472B6,
+        160px 55px rgba(168,85,247,0.7),
+        310px 15px #fff,
+        470px 40px rgba(244,114,182,0.5),
+        610px 10px #fff,
+        740px 35px rgba(168,85,247,0.6),
+        80px 110px #F472B6,
+        240px 85px rgba(255,255,255,0.8),
+        390px 120px rgba(168,85,247,0.4),
+        550px 75px #fff,
+        690px 100px rgba(244,114,182,0.7),
+        120px 190px #fff,
+        330px 165px rgba(168,85,247,0.6),
+        490px 205px #F472B6,
+        650px 185px rgba(255,255,255,0.5),
+        20px 270px rgba(168,85,247,0.8),
+        190px 245px #fff,
+        410px 285px rgba(244,114,182,0.6),
+        570px 260px #fff,
+        720px 280px rgba(168,85,247,0.7),
+        100px 340px rgba(244,114,182,0.5),
+        290px 355px #fff,
+        450px 325px rgba(168,85,247,0.6),
+        630px 345px #F472B6;
+    animation: level5Twinkle 2.5s ease-in-out infinite alternate;
+}
+
+#gameScreen[data-level="5"]::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(ellipse, rgba(168, 85, 247, 0.1) 0%, rgba(244, 114, 182, 0.06) 40%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: level5NebulaFloat 20s ease-in-out infinite alternate;
+}
+
+@keyframes level5Twinkle {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+@keyframes level5NebulaFloat {
+    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) scale(1.25) rotate(40deg); }
+}

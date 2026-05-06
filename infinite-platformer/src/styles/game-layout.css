@@ -1,0 +1,125 @@
+/* Estrutura do jogo e elementos de fundo */
+canvas {
+    display: block;
+    margin: 0 auto;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 50%, #7fb069 100%);
+    border: 3px solid #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    transition: background 1.5s ease;
+}
+
+#gameScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+    padding-top: 0;
+}
+
+.game-cloud {
+    position: fixed;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.game-cloud:before,
+.game-cloud:after {
+    content: '';
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+}
+
+.game-cloud1 {
+    width: 80px;
+    height: 32px;
+    top: 100px;
+    left: 50px;
+    animation: float 6s ease-in-out infinite;
+}
+
+.game-cloud1:before {
+    width: 40px;
+    height: 40px;
+    top: -20px;
+    left: 8px;
+}
+
+.game-cloud1:after {
+    width: 48px;
+    height: 32px;
+    top: -12px;
+    right: 8px;
+}
+
+.game-cloud2 {
+    width: 70px;
+    height: 28px;
+    top: 150px;
+    right: 80px;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+.game-cloud2:before {
+    width: 35px;
+    height: 35px;
+    top: -18px;
+    left: 12px;
+}
+
+.game-cloud2:after {
+    width: 42px;
+    height: 28px;
+    top: -10px;
+    right: 12px;
+}
+
+.game-cloud3 {
+    width: 60px;
+    height: 24px;
+    top: 250px;
+    left: 100px;
+    animation: float 7s ease-in-out infinite;
+}
+
+.game-cloud3:before {
+    width: 30px;
+    height: 30px;
+    top: -15px;
+    left: 10px;
+}
+
+.game-cloud3:after {
+    width: 36px;
+    height: 24px;
+    top: -8px;
+    right: 10px;
+}
+
+.player {
+    width: 50px;
+    height: 50px;
+    background-color: #FF0000;
+    position: absolute;
+    transition: transform 0.1s;
+}
+
+.platform {
+    background-color: #0000ff;
+    position: absolute;
+    height: 20px;
+}
+
+.jump-animation {
+    animation: jump 0.5s ease forwards;
+}
