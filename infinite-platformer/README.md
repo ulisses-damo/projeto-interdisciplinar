@@ -59,6 +59,10 @@ infinite-platformer
 
 ##Melhorias pra agora
 
+camera.js-sistema de camera
+levelManeger.js-congig==
+
+
 -som
 -niveis
 -corrigir as plataformas

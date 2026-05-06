@@ -59,6 +59,23 @@ function init(level) {
     requestAnimationFrame(gameLoop);
 }
 
+function handlePlayerHit(onSurvive) {
+    if (PowerUpManager.hasShield()) {
+        if (typeof onSurvive === 'function') onSurvive();
+        return true;
+    }
+
+    if (PowerUpManager.useExtraLife()) {
+        if (typeof onSurvive === 'function') onSurvive();
+        return true;
+    }
+
+    isGameOver = true;
+    SoundManager.stop();
+    UIManager.showGameOver(platformCount, LevelManager.currentLevel);
+    return false;
+}
+
 // ===== GAME LOOP =====
 function gameLoop() {
     if (isGameOver) return;
@@ -98,6 +115,17 @@ function update() {
             const landingY = typeof plat.getSurfaceYAt === 'function'
                 ? plat.getSurfaceYAt(feetX)
                 : plat.y;
+
+            if (typeof plat.isSpiked === 'function' && plat.isSpiked()) {
+                const survived = handlePlayerHit(() => {
+                    player.y = landingY - player.height - 2;
+                    player.velocityY = -7;
+                    player.isJumping = true;
+                });
+
+                if (!survived) return;
+                continue;
+            }
 
             player.y = landingY - player.height;
             player.velocityY = 0;
@@ -155,27 +183,16 @@ function update() {
     // --- Gotas de lava (nível 3+) ---
     LavaManager.update(LevelManager.currentLevel, canvas.width, canvas.height, Camera.y);
     if (LavaManager.checkCollision(player)) {
-        // Escudo ativo? Ignorar hit
-        if (PowerUpManager.hasShield()) {
+        const survived = handlePlayerHit(() => {
             // Remove as gotas que colidiram para feedback visual
             LavaManager.drops = LavaManager.drops.filter(drop => {
                 const dx = drop.x - (player.x + player.width / 2);
                 const dy = drop.y - (player.y + player.height / 2);
                 return Math.sqrt(dx * dx + dy * dy) >= 28 + drop.size;
             });
-        } else if (PowerUpManager.useExtraLife()) {
-            // Vida extra consumida — sobrevive mas remove gotas próximas
-            LavaManager.drops = LavaManager.drops.filter(drop => {
-                const dx = drop.x - (player.x + player.width / 2);
-                const dy = drop.y - (player.y + player.height / 2);
-                return Math.sqrt(dx * dx + dy * dy) >= 28 + drop.size;
-            });
-        } else {
-            isGameOver = true;
-            SoundManager.stop();
-            UIManager.showGameOver(platformCount, LevelManager.currentLevel);
-            return;
-        }
+        });
+
+        if (!survived) return;
     }
 
     // --- Reposicionar plataformas que saíram por baixo ---

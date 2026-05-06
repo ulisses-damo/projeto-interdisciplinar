@@ -8,7 +8,7 @@ class Platform {
         this.id = id;
         
         // Sistema de plataformas que desmoronam
-        this.type = type; // 'normal' ou 'crumbling'
+        this.type = type;
         this.crumbleStarted = false;
         this.crumbleTimer = 0;
         this.crumbleMaxTime = 60; // ~1 segundo a 60fps para começar a cair
@@ -23,8 +23,16 @@ class Platform {
         return this.type === 'triangle-left' || this.type === 'triangle-right';
     }
 
+    isSpiked() {
+        return this.type === 'spiked';
+    }
+
     isSlippery() {
         return this.isTriangle();
+    }
+
+    getSpikeHeight() {
+        return this.isSpiked() ? 12 : 0;
     }
 
     getSlideVelocity() {
@@ -33,6 +41,10 @@ class Platform {
     }
 
     getSurfaceYAt(worldX) {
+        if (this.isSpiked()) {
+            return this.y - this.getSpikeHeight() + 2;
+        }
+
         if (!this.isTriangle()) return this.y;
 
         const localX = clamp(worldX - this.x, 0, this.width);
@@ -108,17 +120,25 @@ class Platform {
             return;
         }
 
-        // === Plataforma normal ===
+        if (this.isSpiked()) {
+            this._renderSpikedPlatform(context);
+            context.restore();
+            return;
+        }
+
+        this._renderRoundedPlatform(context, this.color);
+        context.restore();
+    }
+
+    _renderRoundedPlatform(context, fillColor) {
         const radius = 10;
 
-        // Sombra para profundidade
         context.shadowColor = 'rgba(0, 0, 0, 0.45)';
         context.shadowBlur = 8;
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 3;
 
-        // Corpo da plataforma
-        context.fillStyle = this.color;
+        context.fillStyle = fillColor;
         context.beginPath();
         context.moveTo(this.x + radius, this.y);
         context.lineTo(this.x + this.width - radius, this.y);
@@ -132,7 +152,6 @@ class Platform {
         context.closePath();
         context.fill();
 
-        // Borda
         context.shadowColor = 'transparent';
         context.shadowBlur = 0;
         context.shadowOffsetY = 0;
@@ -140,7 +159,6 @@ class Platform {
         context.lineWidth = 1.5;
         context.stroke();
 
-        // Brilho no topo (efeito 3D)
         context.fillStyle = 'rgba(255, 255, 255, 0.15)';
         context.beginPath();
         context.moveTo(this.x + radius, this.y);
@@ -152,8 +170,39 @@ class Platform {
         context.quadraticCurveTo(this.x, this.y, this.x + radius, this.y);
         context.closePath();
         context.fill();
+    }
 
-        context.restore();
+    _renderSpikedPlatform(context) {
+        this._renderRoundedPlatform(context, '#1E293B');
+
+        const spikeHeight = this.getSpikeHeight();
+        const spikeCount = Math.max(6, Math.floor(this.width / 16));
+        const spikeWidth = this.width / spikeCount;
+        const spikeGradient = context.createLinearGradient(0, this.y - spikeHeight, 0, this.y + 3);
+        spikeGradient.addColorStop(0, '#F8FAFC');
+        spikeGradient.addColorStop(0.45, '#CBD5E1');
+        spikeGradient.addColorStop(1, '#94A3B8');
+
+        context.fillStyle = spikeGradient;
+        context.strokeStyle = 'rgba(15, 23, 42, 0.8)';
+        context.lineWidth = 1;
+
+        for (let i = 0; i < spikeCount; i++) {
+            const startX = this.x + i * spikeWidth;
+            const tipX = startX + spikeWidth / 2;
+            const endX = startX + spikeWidth;
+
+            context.beginPath();
+            context.moveTo(startX, this.y + 1);
+            context.lineTo(tipX, this.y - spikeHeight);
+            context.lineTo(endX, this.y + 1);
+            context.closePath();
+            context.fill();
+            context.stroke();
+        }
+
+        context.fillStyle = 'rgba(248, 113, 113, 0.85)';
+        context.fillRect(this.x + 6, this.y + 4, this.width - 12, 3);
     }
 
     // Renderiza plataforma como NUVEM fofa

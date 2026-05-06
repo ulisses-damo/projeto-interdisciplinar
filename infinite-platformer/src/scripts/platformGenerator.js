@@ -24,10 +24,14 @@ const PlatformGenerator = {
     // Rastreamento
     frontierRowY: 0,        // Y mais distante já gerado na direção do nível
     platformList: null,     // Referência para checar overlap
+    generatedRowCount: 0,
+    pendingRow: null,
 
     reset() {
         this.frontierRowY = 0;
         this.platformList = null;
+        this.generatedRowCount = 0;
+        this.pendingRow = null;
     },
 
     // =======================================
@@ -57,17 +61,14 @@ const PlatformGenerator = {
             rowY += descending ? gap : -gap;
 
             const count = this._getPlatformsPerRow(level);
-            const positions = this._generateRowPositions(count, canvasWidth);
+            const rowEntries = this._createRowEntries(level, ++this.generatedRowCount, count, rowY, canvasWidth);
 
-            for (let p = 0; p < positions.length; p++) {
-                const jitterY = (Math.random() - 0.5) * this.ROW_JITTER_Y * 2;
-                const type = this._getType(level, row);
-
+            for (let p = 0; p < rowEntries.length; p++) {
                 platforms.push(new Platform(
-                    positions[p],
-                    rowY + jitterY,
+                    rowEntries[p].x,
+                    rowEntries[p].y,
                     this.PLATFORM_WIDTH, this.PLATFORM_HEIGHT,
-                    color, idCounter++, type
+                    color, idCounter++, rowEntries[p].type
                 ));
             }
         }
@@ -123,53 +124,26 @@ const PlatformGenerator = {
             frontierY = platform.y;
         }
 
-        // Quantas plataformas já estão perto da borda de avanço?
-        const frontZone = descending ? frontierY - 40 : frontierY + 40;
-        let nearFront = 0;
-        for (const p of allPlatforms) {
-            if (p === platform || p.isFalling) continue;
-
-            if (descending) {
-                if (p.y > frontZone) nearFront++;
-            } else if (p.y < frontZone) {
-                nearFront++;
-            }
-        }
-
-        let newY;
-        if (nearFront < this.MIN_PER_ROW) {
-            // Completa a camada já existente na borda de avanço
-            const jitter = (Math.random() - 0.5) * this.ROW_JITTER_Y * 2;
-            newY = frontierY + jitter;
-        } else {
-            // A camada atual já está cheia — criar outra mais à frente
-            const gap = this._getRowGap(level);
+        if (!this.pendingRow || this.pendingRow.level !== level || this.pendingRow.index >= this.pendingRow.entries.length) {
             const referenceY = descending
                 ? Math.max(frontierY, this.frontierRowY)
                 : Math.min(frontierY, this.frontierRowY);
 
-            newY = referenceY + (descending ? gap : -gap);
-            const jitter = (Math.random() - 0.5) * this.ROW_JITTER_Y * 2;
-            newY += jitter;
-            this.frontierRowY = descending
-                ? Math.max(this.frontierRowY, newY)
-                : Math.min(this.frontierRowY, newY);
+            this.pendingRow = this._createPendingRow(level, canvasWidth, referenceY);
         }
 
-        // X aleatório pelo canvas inteiro, evitando sobreposição
-        let x = this._findGoodX(newY, allPlatforms, platform, canvasWidth);
+        const rowEntry = this.pendingRow.entries[this.pendingRow.index++];
 
-        platform.x = x;
-        platform.y = newY;
+        platform.x = rowEntry.x;
+        platform.y = rowEntry.y;
         platform.id = nextId;
         platform.color = LevelManager.getPlatformColor(level);
-        this.frontierRowY = descending
-            ? Math.max(this.frontierRowY, platform.y)
-            : Math.min(this.frontierRowY, platform.y);
-
-        // Tipo
-        platform.type = this._getType(level);
+        platform.type = rowEntry.type;
         platform.resetCrumble();
+
+        if (this.pendingRow.index >= this.pendingRow.entries.length) {
+            this.pendingRow = null;
+        }
 
         return nextId + 1;
     },
@@ -321,9 +295,58 @@ const PlatformGenerator = {
         }
     },
 
-    _getType(level, rowIndex = 3) {
-        if (rowIndex <= 2) return 'normal'; // Primeiras 2 camadas sempre seguras
+    _createRowEntries(level, rowIndex, count, rowY, canvasWidth) {
+        const positions = this._generateRowPositions(count, canvasWidth);
+        const types = this._getRowTypes(level, rowIndex, count);
 
+        return positions.map((x, index) => ({
+            x,
+            y: rowY + (Math.random() - 0.5) * this.ROW_JITTER_Y * 2,
+            type: types[index]
+        }));
+    },
+
+    _createPendingRow(level, canvasWidth, referenceY) {
+        const descending = LevelManager.isDescending(level);
+        const gap = this._getRowGap(level);
+        const rowY = referenceY + (descending ? gap : -gap);
+        const count = this._getPlatformsPerRow(level);
+        const entries = this._createRowEntries(level, ++this.generatedRowCount, count, rowY, canvasWidth);
+        const frontierEdge = entries.reduce(
+            (edgeY, entry) => descending ? Math.max(edgeY, entry.y) : Math.min(edgeY, entry.y),
+            descending ? -Infinity : Infinity
+        );
+
+        this.frontierRowY = descending
+            ? Math.max(this.frontierRowY, frontierEdge)
+            : Math.min(this.frontierRowY, frontierEdge);
+
+        return {
+            level,
+            entries,
+            index: 0
+        };
+    },
+
+    _getRowTypes(level, rowIndex, count) {
+        const types = Array.from({ length: count }, () => 'normal');
+
+        if (rowIndex <= 2) return types;
+
+        if (level === 4 && count === 3) {
+            const spikeIndex = Math.floor(Math.random() * count);
+            types[spikeIndex] = 'spiked';
+        }
+
+        for (let index = 0; index < types.length; index++) {
+            if (types[index] !== 'normal') continue;
+            types[index] = this._getType(level);
+        }
+
+        return types;
+    },
+
+    _getType(level) {
         if (level === 4 && Math.random() < 0.18) {
             return Math.random() < 0.5 ? 'triangle-left' : 'triangle-right';
         }
