@@ -1,3 +1,4 @@
 {
-  "outputDirectory": "infinite-platformer"
+  "rootDirectory": "infinite-platformer",
+  "outputDirectory": "src"
 }
