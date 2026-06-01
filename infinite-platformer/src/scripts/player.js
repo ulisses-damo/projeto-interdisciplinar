@@ -20,10 +20,10 @@ function createPlayerSprite(src) {
 }
 
 const PLAYER_SPRITES = {
-    base: createPlayerSprite('../assets/LULI.png'),
-    jump: createPlayerSprite('../assets/pulando.png'),
-    fall: createPlayerSprite('../assets/caindo.png'),
-    death: createPlayerSprite('../assets/morrendo.png'),
+    base: createPlayerSprite('./assets/LULI.png'),
+    jump: createPlayerSprite('./assets/pulando.png'),
+    fall: createPlayerSprite('./assets/caindo.png'),
+    death: createPlayerSprite('./assets/morrendo.png'),
 };
 
 const PLAYER_ANIMATIONS = {
