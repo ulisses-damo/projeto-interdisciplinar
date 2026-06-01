@@ -18,17 +18,17 @@
 
 ## Visao Geral
 
-As Aventuras de Maicon e um jogo de plataforma 2D desenvolvido com HTML5, CSS3 e JavaScript puro, renderizado via Canvas 2D. O projeto evoluiu de um platformer vertical simples para uma estrutura com multiplos niveis tematicos, desbloqueio progressivo, trilhas sonoras por fase, hazards contextuais, power-ups e um nivel especial com progressao invertida.
+As Aventuras de Maicon e um jogo de plataforma 2D desenvolvido com HTML5, CSS3 e JavaScript puro, renderizado via Canvas 2D. O projeto evoluiu de um platformer vertical simples para uma estrutura com multiplos niveis tematicos, desbloqueio progressivo, uma trilha sonora padrao, hazards contextuais, power-ups e um nivel especial com progressao invertida.
 
 ### Caracteristicas atuais
-- 5 niveis com temas visuais, musica e dificuldade proprios.
+- 5 niveis com temas visuais e dificuldade proprios, todos usando a mesma musica padrao.
 - Progressao vertical por subida nos niveis 1, 2, 3 e 5.
 - Progressao vertical por descida no nivel 4, com barreira de morte no topo.
 - Plataformas normais, plataformas que desmoronam e plataformas triangulares escorregadias.
 - Power-ups a partir do nivel 3: escudo, vida extra e pulo duplo.
 - Lava como hazard nos niveis 3 e 5.
 - Seletor de niveis com desbloqueio persistido em `localStorage`.
-- Tela inicial, HUD dinamica, tela de conclusao de nivel e game over com as acoes Tentar novamente e Escolher nivel.
+- Tela inicial, HUD dinamica, estrelas bonus por nivel, tela de conclusao de nivel e game over com as acoes Tentar novamente e Escolher nivel.
 
 ### Objetivo de jogo
 O jogador deve tocar um numero alvo de plataformas unicas para concluir o nivel atual e desbloquear o proximo. O risco principal varia por fase: queda fora da area segura, plataformas instaveis, lava e dificuldade crescente de navegacao.
@@ -95,7 +95,7 @@ O projeto segue um modelo de aplicacao estatico em pagina unica, com modulos Jav
 ### Bibliotecas e APIs
 | Recurso | Uso atual |
 | --- | --- |
-| Howler.js | Musica de fundo por nivel |
+| Howler.js | Musica de fundo padrao |
 | `requestAnimationFrame` | Loop principal em ~60 FPS |
 | `localStorage` | Persistencia dos niveis desbloqueados |
 | DOM Events | Entrada do teclado e interacoes de UI |
@@ -147,7 +147,7 @@ projeto-interdisciplinar/
 | `platformGenerator.js` | Criacao inicial, reciclagem e buffer preditivo de plataformas |
 | `lavaManager.js` | Spawn, movimento, colisao e renderizacao de lava |
 | `powerUpManager.js` | Spawn, coleta, duracao e efeitos de power-up |
-| `soundManager.js` | Preload, reproducao e troca de trilha sonora |
+| `soundManager.js` | Preload, reproducao e controle da trilha sonora padrao |
 | `uiManager.js` | Fluxos de tela inicial, seletor, fim de nivel e game over |
 | `utils.js` | Colisao e funcoes utilitarias gerais |
 
@@ -221,17 +221,20 @@ O jogo deve suportar hazards especificos por fase. Atualmente a lava esta ativa 
 ### RF14 - Sistema de power-ups
 O sistema deve gerar, renderizar, permitir coleta e aplicar efeitos temporarios ou consumiveis para escudo, vida extra e pulo duplo a partir do nivel 3.
 
-### RF15 - Audio por nivel
-Cada fase deve possuir uma trilha sonora propria, trocada automaticamente na entrada do nivel e interrompida em game over ou conclusao.
+### RF15 - Audio padrao
+Todas as fases devem reutilizar a trilha sonora do nivel 1, interrompida em game over ou conclusao.
 
 ### RF16 - Feedback visual de estado
 O jogo deve exibir HUD com contador de plataformas, nivel atual e indicador de power-up ativo.
+
+### RF16A - Estrelas bonus por nivel
+Cada nivel deve distribuir 3 estrelas em posicoes aleatorias como objetivo bonus opcional, sem influenciar a conclusao da fase.
 
 ### RF17 - Game over com acoes imediatas
 Ao perder, o sistema deve exibir a pontuacao da tentativa e oferecer as acoes `Tentar novamente` e `Escolher nivel`.
 
 ### RF18 - Renderizacao do personagem animado
-O personagem deve animar continuamente e virar de lado conforme a direcao horizontal atual.
+O personagem deve trocar entre animacoes de corrida, pulo, queda e morte, alem de virar de lado conforme a direcao horizontal atual.
 
 ---
 
@@ -308,7 +311,7 @@ Mecanismos relevantes:
 - posicao e velocidade;
 - estado de pulo;
 - orientacao horizontal;
-- animacao por spritesheet 2x2 com 3 frames utilizados.
+- animacoes separadas para corrida, pulo, queda e morte.
 
 ### 6. Sistema de colisao
 `utils.js` calcula colisao horizontal e verifica se os pes do jogador estao na altura da superficie da plataforma. Para plataformas triangulares, a superficie e calculada dinamicamente pela funcao `getSurfaceYAt`.
@@ -329,8 +332,8 @@ Mecanismos relevantes:
 
 ### 9. Audio
 `soundManager.js` usa Howler.js para:
-- pre-carregar trilhas por nivel;
-- tocar, pausar, retomar e parar musicas;
+- pre-carregar a trilha padrao do nivel 1;
+- tocar, pausar, retomar e parar a musica padrao;
 - ajustar volume global.
 
 ### 10. UI

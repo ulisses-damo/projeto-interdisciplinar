@@ -81,12 +81,15 @@ const UIManager = {
     },
 
     // --- Tela de conclusão de nível ---
-    showLevelComplete(level) {
+    showLevelComplete(level, collectedAllStars) {
         const overlay = document.getElementById('levelCompleteOverlay');
         const text = document.getElementById('levelCompleteText');
         if (overlay && text) {
             const theme = LevelManager.getTheme(level);
-            text.innerHTML = `🎉 Muito bem!<br>Você passou do Nível ${level}!<br><span style="font-size:0.5em; opacity:0.8;">${theme.name}</span>`;
+            const bonusText = collectedAllStars
+                ? '<br><span style="font-size:0.45em; color:#FDE68A;">Bonus das estrelas completo! ⭐⭐⭐</span>'
+                : '';
+            text.innerHTML = `🎉 Muito bem!<br>Você passou do Nível ${level}!<br><span style="font-size:0.5em; opacity:0.8;">${theme.name}</span>${bonusText}`;
             overlay.style.display = 'flex';
             overlay.style.opacity = '1';
         }

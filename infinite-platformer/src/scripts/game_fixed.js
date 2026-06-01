@@ -8,6 +8,7 @@ let player;
 let platforms = [];
 let gravity = 0.4;
 let isGameOver = false;
+let isPlayerDying = false;
 let platformCount = 0;
 let visitedPlatforms = new Set();
 let platformIdCounter = 0;
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function init(level) {
     LevelManager.currentLevel = level || 1;
     isGameOver = false;
+    isPlayerDying = false;
     platformCount = 0;
     visitedPlatforms = new Set();
     platformIdCounter = 0;
@@ -31,6 +33,7 @@ function init(level) {
     PlatformGenerator.reset();
     LavaManager.reset();
     PowerUpManager.reset();
+    StarManager.reset(LevelManager.currentLevel);
 
     // Criar plataformas
     const result = PlatformGenerator.createInitial(canvas.width, canvas.height, LevelManager.currentLevel);
@@ -49,14 +52,42 @@ function init(level) {
     LevelManager.updateHUD(0);
     LevelManager.updateLevelIndicator(LevelManager.currentLevel);
 
-    // Música de fundo do nível
-    SoundManager.play(LevelManager.currentLevel);
+    // Musica de fundo padrao
+    SoundManager.play();
 
     // Esconder overlays
     UIManager.hideLevelSelector();
     UIManager.hideLevelComplete();
+    UIManager.hideGameOver();
 
     requestAnimationFrame(gameLoop);
+}
+
+function finalizeGameOver() {
+    if (isGameOver) {
+        return;
+    }
+
+    isPlayerDying = false;
+    isGameOver = true;
+    UIManager.showGameOver(platformCount, LevelManager.currentLevel);
+}
+
+function triggerPlayerDeath(useAnimation) {
+    if (isGameOver || isPlayerDying) {
+        return false;
+    }
+
+    SoundManager.stop();
+
+    if (useAnimation && player) {
+        isPlayerDying = true;
+        player.startDeathAnimation();
+        return false;
+    }
+
+    finalizeGameOver();
+    return false;
 }
 
 function handlePlayerHit(onSurvive) {
@@ -70,9 +101,7 @@ function handlePlayerHit(onSurvive) {
         return true;
     }
 
-    isGameOver = true;
-    SoundManager.stop();
-    UIManager.showGameOver(platformCount, LevelManager.currentLevel);
+    triggerPlayerDeath(true);
     return false;
 }
 
@@ -87,6 +116,16 @@ function gameLoop() {
 
 // ===== UPDATE =====
 function update() {
+    if (isPlayerDying) {
+        player.updateAnimation();
+
+        if (player.isDeathAnimationComplete()) {
+            finalizeGameOver();
+        }
+
+        return;
+    }
+
     // --- Movimento do jogador ---
     player.x += player.velocityX;
     if (player.x < 0) player.x = 0;
@@ -94,14 +133,6 @@ function update() {
 
     player.y += player.velocityY;
     if (player.velocityY > 12) player.velocityY = 12;
-
-    // --- Animação do sprite ---
-    player.frameCounter = player.frameCounter || 0;
-    player.frameCounter++;
-    if (player.frameCounter >= player.frameDelay) {
-        player.frameCounter = 0;
-        player.currentFrame = (player.currentFrame + 1) % player.totalFrames;
-    }
 
     // --- Colisão com plataformas ---
     for (let i = 0; i < platforms.length; i++) {
@@ -157,7 +188,7 @@ function update() {
                         LevelManager.unlockLevel(lvl + 1);
                     }
 
-                    UIManager.showLevelComplete(lvl);
+                    UIManager.showLevelComplete(lvl, StarManager.hasCollectedAll());
                     setTimeout(() => {
                         UIManager.hideLevelComplete();
                         UIManager.showLevelSelector();
@@ -175,6 +206,17 @@ function update() {
 
     // --- Câmera ---
     Camera.update(player.y);
+
+    // --- Estrelas bônus ---
+    StarManager.update(
+        LevelManager.currentLevel,
+        platforms,
+        player,
+        Camera.y,
+        canvas.height,
+        platformCount
+    );
+    StarManager.checkPickup(player);
 
     // --- Power-ups (nível 3+) ---
     PowerUpManager.update(LevelManager.currentLevel, platforms, canvas.width, Camera.y, canvas.height);
@@ -213,11 +255,11 @@ function update() {
         player
     );
 
+    player.updateAnimation();
+
     // --- Game Over ---
     if (Camera.isPlayerDead(player, canvas.height)) {
-        isGameOver = true;
-        SoundManager.stop();
-        UIManager.showGameOver(platformCount, LevelManager.currentLevel);
+        triggerPlayerDeath(false);
     }
 }
 
@@ -233,6 +275,9 @@ function render() {
         }
     }
 
+    // Estrelas bônus no mundo
+    StarManager.render(ctx);
+
     // Power-ups no mundo
     PowerUpManager.render(ctx);
 
@@ -240,7 +285,9 @@ function render() {
     player.render(ctx);
 
     // Efeito visual do poder ativo no jogador
-    PowerUpManager.renderPlayerEffect(ctx, player);
+    if (!player.isDying) {
+        PowerUpManager.renderPlayerEffect(ctx, player);
+    }
 
     // Gotas de lava (nível 3+)
     LavaManager.render(ctx, canvas.height, Camera.y);
@@ -250,7 +297,7 @@ function render() {
 
 // ===== INPUT =====
 window.addEventListener('keydown', (event) => {
-    if (!player) return;
+    if (!player || player.isDying) return;
     if (event.code === 'Space') {
         if (!player.isJumping) {
             player.jump();
@@ -270,7 +317,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 window.addEventListener('keyup', (event) => {
-    if (!player) return;
+    if (!player || player.isDying) return;
     if (event.code === 'ArrowLeft' && player.velocityX < 0) {
         player.velocityX = 0;
     } else if (event.code === 'ArrowRight' && player.velocityX > 0) {

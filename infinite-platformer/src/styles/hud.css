@@ -33,12 +33,38 @@
     border: 1px solid rgba(255,255,255,0.2);
 }
 
+#starCounter {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 1em;
+    font-weight: bold;
+    color: #FFF7CC;
+    text-shadow:
+        1px 1px 0 rgba(120,53,15,0.7),
+        0 0 12px rgba(251,191,36,0.35);
+    letter-spacing: 1px;
+    z-index: 100;
+    position: fixed;
+    top: 95px;
+    right: 30px;
+    background: rgba(0,0,0,0.42);
+    padding: 6px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 244, 163, 0.35);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+#starCounter.complete {
+    border-color: rgba(253, 224, 71, 0.9);
+    box-shadow: 0 0 18px rgba(250, 204, 21, 0.45);
+    transform: scale(1.04);
+}
+
 #powerUpIndicator {
     display: none;
     align-items: center;
     gap: 8px;
     position: fixed;
-    top: 95px;
+    top: 135px;
     right: 30px;
     z-index: 100;
     background: rgba(0, 0, 0, 0.55);
@@ -52,6 +78,34 @@
     backdrop-filter: blur(4px);
     transition: border-color 0.3s, box-shadow 0.3s;
     animation: powerupPulse 1.5s ease-in-out infinite;
+}
+
+#starBonusMessage {
+    position: fixed;
+    top: 188px;
+    right: 30px;
+    z-index: 100;
+    max-width: 240px;
+    padding: 8px 14px;
+    border-radius: 14px;
+    background: rgba(120, 53, 15, 0.82);
+    color: #FFF7CC;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 0.9em;
+    line-height: 1.3;
+    letter-spacing: 0.6px;
+    text-align: center;
+    border: 1px solid rgba(253, 224, 71, 0.45);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#starBonusMessage.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 #powerUpIndicator .powerup-emoji {
