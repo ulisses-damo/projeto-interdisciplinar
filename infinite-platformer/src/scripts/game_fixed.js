@@ -17,6 +17,7 @@ let platformIdCounter = 0;
 document.addEventListener('DOMContentLoaded', function () {
     SoundManager.init();
     UIManager.init();
+    StoryManager.init();
     UIManager.onLevelSelected = init;
 });
 
@@ -27,6 +28,13 @@ function init(level) {
     platformCount = 0;
     visitedPlatforms = new Set();
     platformIdCounter = 0;
+
+    if (LevelManager.isBossLevel(LevelManager.currentLevel)) {
+        initBossLevel();
+        return;
+    }
+
+    UIManager.setBossHUDVisible(false);
 
     // Reset módulos
     Camera.reset(canvas.height, LevelManager.currentLevel);
@@ -61,6 +69,48 @@ function init(level) {
     UIManager.hideGameOver();
 
     requestAnimationFrame(gameLoop);
+}
+
+// ===== NÍVEL DE CHEFE (Nível 5) =====
+function initBossLevel() {
+    UIManager.setBossHUDVisible(true);
+
+    Camera.reset(canvas.height, LevelManager.currentLevel);
+    PowerUpManager.reset();
+    BossManager.reset();
+    BossItemManager.reset();
+
+    platforms = BossArena.build();
+
+    const first = platforms[0];
+    player = new Player(
+        first.x + (first.width / 2) - 32,
+        first.y - 64
+    );
+
+    LevelManager.applyTheme(LevelManager.currentLevel, canvas);
+    LevelManager.updateLevelIndicator(LevelManager.currentLevel);
+
+    SoundManager.playBossTrack();
+
+    UIManager.hideLevelSelector();
+    UIManager.hideLevelComplete();
+    UIManager.hideGameOver();
+
+    requestAnimationFrame(gameLoop);
+}
+
+function handleBossVictory() {
+    if (isGameOver) return;
+
+    isGameOver = true;
+    SoundManager.stop();
+    UIManager.showLevelComplete(LevelManager.currentLevel, false);
+
+    setTimeout(() => {
+        UIManager.hideLevelComplete();
+        UIManager.showLevelSelector();
+    }, 4000);
 }
 
 function finalizeGameOver() {
@@ -116,6 +166,11 @@ function gameLoop() {
 
 // ===== UPDATE =====
 function update() {
+    if (LevelManager.isBossLevel(LevelManager.currentLevel)) {
+        updateBossLevel();
+        return;
+    }
+
     if (isPlayerDying) {
         player.updateAnimation();
 
@@ -263,8 +318,74 @@ function update() {
     }
 }
 
+function updateBossLevel() {
+    if (isPlayerDying) {
+        player.updateAnimation();
+
+        if (player.isDeathAnimationComplete()) {
+            finalizeGameOver();
+        }
+
+        return;
+    }
+
+    // --- Movimento do jogador ---
+    player.x += player.velocityX;
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+    player.y += player.velocityY;
+    if (player.velocityY > 12) player.velocityY = 12;
+
+    // --- Colisão com plataformas fixas da arena ---
+    for (let i = 0; i < platforms.length; i++) {
+        const plat = platforms[i];
+
+        if (detectCollision(player, plat)) {
+            player.y = plat.y - player.height;
+            player.velocityY = 0;
+            player.isJumping = false;
+        }
+    }
+
+    // --- Gravidade ---
+    player.velocityY += gravity;
+
+    // --- Chefe: ataques, arremessos do jogador, dano ---
+    BossManager.update(canvas.width, canvas.height);
+    BossItemManager.update(canvas.width, canvas.height);
+    BossItemManager.checkPickup(player);
+    BossItemManager.checkBossHit(BossManager);
+
+    if (BossManager.checkCollision(player)) {
+        const survived = handlePlayerHit(() => {
+            BossManager.clearNearbyMeteors(player);
+        });
+
+        if (!survived) return;
+    }
+
+    player.updateAnimation();
+
+    // --- Vitória ---
+    if (BossManager.isDefeated()) {
+        handleBossVictory();
+        return;
+    }
+
+    // --- Queda fora da arena ---
+    if (Camera.isPlayerDead(player, canvas.height)) {
+        triggerPlayerDeath(false);
+    }
+}
+
 // ===== RENDER =====
 function render() {
+    if (LevelManager.isBossLevel(LevelManager.currentLevel)) {
+        renderBossLevel();
+        return;
+    }
+
     ctx.save();
     ctx.translate(0, -Camera.y);
 
@@ -295,6 +416,21 @@ function render() {
     ctx.restore();
 }
 
+function renderBossLevel() {
+    ctx.save();
+
+    for (let i = 0; i < platforms.length; i++) {
+        platforms[i].render(ctx);
+    }
+
+    BossManager.render(ctx);
+    BossItemManager.render(ctx);
+    player.render(ctx);
+    BossItemManager.renderCarriedItem(ctx, player);
+
+    ctx.restore();
+}
+
 // ===== INPUT =====
 window.addEventListener('keydown', (event) => {
     if (!player || player.isDying) return;
@@ -313,6 +449,9 @@ window.addEventListener('keydown', (event) => {
     } else if (event.code === 'ArrowRight') {
         player.velocityX = 3;
         player.facingLeft = false;
+    } else if (event.code === 'ArrowUp' && LevelManager.isBossLevel(LevelManager.currentLevel)) {
+        event.preventDefault();
+        BossItemManager.throwItem(player);
     }
 });
 

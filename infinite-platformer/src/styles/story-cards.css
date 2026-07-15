@@ -1,0 +1,113 @@
+/* Cards de história — introdução narrativa */
+.story-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 70;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.story-card {
+    width: min(560px, 90vw);
+    background: linear-gradient(160deg, #1e1b4b, #0a0015);
+    border: 2px solid rgba(244, 114, 182, 0.4);
+    border-radius: 20px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: zoomIn 0.4s ease-out;
+}
+
+.story-art {
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5em;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    animation: float 3s ease-in-out infinite;
+}
+
+.art-village   { background: linear-gradient(160deg, #87CEEB, #7fb069); }
+.art-kidnap    { background: linear-gradient(160deg, #450a0a, #1e0040); }
+.art-journey   { background: linear-gradient(160deg, #FEF3C7, #D97706); }
+.art-realms    { background: linear-gradient(160deg, #7F1D1D, #991B1B); }
+.art-night     { background: linear-gradient(160deg, #0f172a, #312e81); }
+.art-battle    { background: linear-gradient(160deg, #140025, #a855f7); }
+
+.story-card h2 {
+    color: #FFD700;
+    font-family: 'Arial Black', sans-serif;
+    font-size: 1.5em;
+    margin: 0 0 12px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+}
+
+.story-card p {
+    color: #f1f5f9;
+    font-size: 1.05em;
+    line-height: 1.5;
+    margin: 0 0 22px;
+}
+
+.story-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.story-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.story-dot.active {
+    background: #F472B6;
+    transform: scale(1.3);
+}
+
+.story-controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.story-skip-btn,
+.story-next-btn {
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 1em;
+    padding: 10px 24px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.story-skip-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+}
+
+.story-skip-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.story-next-btn {
+    background: linear-gradient(135deg, #F472B6, #a855f7);
+    color: white;
+}
+
+.story-next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(168, 85, 247, 0.45);
+}

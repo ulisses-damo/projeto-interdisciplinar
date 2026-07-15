@@ -21,9 +21,22 @@ const UIManager = {
 
             setTimeout(() => {
                 gameScreen.style.opacity = '1';
-                this.showLevelSelector();
+                StoryManager.show(() => this.showLevelSelector());
             }, 50);
         }, 500);
+    },
+
+    // --- HUD da luta contra o chefe ---
+    setBossHUDVisible(isBoss) {
+        const platformCounter = document.getElementById('platformCounter');
+        const starCounter = document.getElementById('starCounter');
+        const bossHealthBar = document.getElementById('bossHealthBar');
+        const bossItemIndicator = document.getElementById('bossItemIndicator');
+
+        if (platformCounter) platformCounter.style.display = isBoss ? 'none' : '';
+        if (starCounter) starCounter.style.display = isBoss ? 'none' : '';
+        if (bossHealthBar) bossHealthBar.style.display = isBoss ? 'flex' : 'none';
+        if (bossItemIndicator) bossItemIndicator.style.display = isBoss ? 'flex' : 'none';
     },
 
     // --- Seletor de níveis ---
@@ -85,11 +98,15 @@ const UIManager = {
         const overlay = document.getElementById('levelCompleteOverlay');
         const text = document.getElementById('levelCompleteText');
         if (overlay && text) {
-            const theme = LevelManager.getTheme(level);
-            const bonusText = collectedAllStars
-                ? '<br><span style="font-size:0.45em; color:#FDE68A;">Bonus das estrelas completo! ⭐⭐⭐</span>'
-                : '';
-            text.innerHTML = `🎉 Muito bem!<br>Você passou do Nível ${level}!<br><span style="font-size:0.5em; opacity:0.8;">${theme.name}</span>${bonusText}`;
+            if (LevelManager.isBossLevel(level)) {
+                text.innerHTML = `👑 Vitória!<br>Você derrotou o Chefe Meteoro<br>e resgatou a Princesa Lumi!<br><span style="font-size:0.4em; opacity:0.85;">FIM DE JOGO — Parabéns, Maicon!</span>`;
+            } else {
+                const theme = LevelManager.getTheme(level);
+                const bonusText = collectedAllStars
+                    ? '<br><span style="font-size:0.45em; color:#FDE68A;">Bonus das estrelas completo! ⭐⭐⭐</span>'
+                    : '';
+                text.innerHTML = `🎉 Muito bem!<br>Você passou do Nível ${level}!<br><span style="font-size:0.5em; opacity:0.8;">${theme.name}</span>${bonusText}`;
+            }
             overlay.style.display = 'flex';
             overlay.style.opacity = '1';
         }
@@ -105,12 +122,20 @@ const UIManager = {
 
     // --- Game Over ---
     showGameOver(platformCount, level) {
-        document.getElementById('finalScore').textContent = platformCount;
         const levelReached = document.getElementById('finalLevel');
-        if (levelReached) {
-            const theme = LevelManager.getTheme(level);
-            levelReached.textContent = `Nível ${level} — ${theme.name}`;
+        const scoreLine = document.getElementById('finalScore') ? document.getElementById('finalScore').parentElement : null;
+
+        if (LevelManager.isBossLevel(level)) {
+            if (levelReached) levelReached.textContent = `Nível ${level} — Confronto Final`;
+            if (scoreLine) scoreLine.textContent = 'O Chefe Meteoro venceu desta vez... Tente novamente!';
+        } else {
+            document.getElementById('finalScore').textContent = platformCount;
+            if (levelReached) {
+                const theme = LevelManager.getTheme(level);
+                levelReached.textContent = `Nível ${level} — ${theme.name}`;
+            }
         }
+
         document.getElementById('gameOverBox').style.display = 'flex';
     },
 

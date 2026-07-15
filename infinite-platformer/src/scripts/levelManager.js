@@ -8,7 +8,7 @@ const LevelManager = {
         2: { name: 'Deserto',   platformColor: '#334155', bgTop: '#FEF3C7', bgMid: '#D97706', bgBot: '#92400E', verticalMode: 'up' },
         3: { name: 'Vulcão',    platformColor: '#FBBF24', bgTop: '#7F1D1D', bgMid: '#991B1B', bgBot: '#450a0a', verticalMode: 'up' },
         4: { name: 'Noite',     platformColor: '#22D3EE', bgTop: '#0f172a', bgMid: '#1e1b4b', bgBot: '#312e81', verticalMode: 'down' },
-        5: { name: 'Galáxia',   platformColor: '#F472B6', bgTop: '#0a0015', bgMid: '#140025', bgBot: '#1e0040', verticalMode: 'up' },
+        5: { name: 'Galáxia',   platformColor: '#F472B6', bgTop: '#0a0015', bgMid: '#140025', bgBot: '#1e0040', verticalMode: 'up', isBossLevel: true },
     },
 
     MAX_LEVEL: 5,
@@ -73,6 +73,10 @@ const LevelManager = {
 
     isDescending(level) {
         return this.getTheme(level).verticalMode === 'down';
+    },
+
+    isBossLevel(level) {
+        return this.getTheme(level).isBossLevel === true;
     },
 
     // --- Dificuldade ---

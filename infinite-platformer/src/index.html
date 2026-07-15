@@ -9,7 +9,9 @@
     <link rel="stylesheet" href="styles/start-screen.css">
     <link rel="stylesheet" href="styles/game-layout.css">
     <link rel="stylesheet" href="styles/hud.css">
+    <link rel="stylesheet" href="styles/boss-hud.css">
     <link rel="stylesheet" href="styles/overlays.css">
+    <link rel="stylesheet" href="styles/story-cards.css">
     <link rel="stylesheet" href="styles/levels/level1.css">
     <link rel="stylesheet" href="styles/levels/level2.css">
     <link rel="stylesheet" href="styles/levels/level3.css">
@@ -41,6 +43,20 @@
         </div>
     </div>
 
+    <!-- Cards de história (sequestro da princesa) -->
+    <div id="storyScreen" class="story-screen" style="display:none;">
+        <div class="story-card">
+            <div id="storyCardArt" class="story-art"></div>
+            <h2 id="storyCardTitle"></h2>
+            <p id="storyCardText"></p>
+            <div id="storyDots" class="story-dots"></div>
+            <div class="story-controls">
+                <button id="storySkipBtn" class="story-skip-btn">Pular</button>
+                <button id="storyNextBtn" class="story-next-btn">Avançar ▶</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tela do Jogo -->
     <div id="gameScreen" style="display: none;">
         <div class="game-cloud game-cloud1"></div>
@@ -52,6 +68,11 @@
         <div id="starCounter">Estrelas: 0 / 3</div>
         <div id="powerUpIndicator" style="display:none;"></div>
         <div id="starBonusMessage"></div>
+        <div id="bossHealthBar" class="boss-health-bar">
+            <div class="boss-health-label">👑 Chefe Meteoro</div>
+            <div class="boss-health-track"><div id="bossHealthFill" class="boss-health-fill"></div></div>
+        </div>
+        <div id="bossItemIndicator" class="boss-item-indicator">🪨</div>
         <div style="margin-top: 70px; display: flex; flex-direction: column; align-items: center;">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <p class="game-instructions" style="margin-top: 10px; margin-bottom: 0;">Use as setas ⬅️➡️ para mover e ESPAÇO para pular!</p>
@@ -99,8 +120,12 @@
     <script src="scripts/lavaManager.js"></script>
     <script src="scripts/powerUpManager.js"></script>
     <script src="scripts/starManager.js"></script>
+    <script src="scripts/bossArena.js"></script>
+    <script src="scripts/bossManager.js"></script>
+    <script src="scripts/bossItemManager.js"></script>
     <script src="scripts/soundManager.js"></script>
     <script src="scripts/uiManager.js"></script>
+    <script src="scripts/storyManager.js"></script>
     <script src="scripts/game_fixed.js"></script>
 </body>
 </html>
