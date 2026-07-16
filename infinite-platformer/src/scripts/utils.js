@@ -27,3 +27,24 @@ function clamp(value, min, max) {
 function lerp(start, end, t) {
     return start + (end - start) * t;
 }
+
+// Carrega uma imagem de sprite e rastreia se já terminou de carregar
+function createSprite(src) {
+    const image = new Image();
+    const sprite = {
+        image,
+        loaded: false,
+        src,
+    };
+
+    image.onload = function() {
+        sprite.loaded = true;
+    };
+
+    image.onerror = function() {
+        console.error(`Erro ao carregar o sprite! Verifique o caminho: ${src}`);
+    };
+
+    image.src = src;
+    return sprite;
+}

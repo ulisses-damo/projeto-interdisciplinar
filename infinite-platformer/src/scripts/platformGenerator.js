@@ -282,17 +282,11 @@ const PlatformGenerator = {
     },
 
     _getPlatformsPerRow(level) {
-        const roll = Math.random();
-        if (level <= 2) {
-            // Fácil: mais plataformas (60% de 3, 40% de 2)
-            return roll < 0.6 ? 3 : 2;
-        } else if (level <= 3) {
-            // Médio: balanceado (45% de 3, 55% de 2)
-            return roll < 0.45 ? 3 : 2;
-        } else {
-            // Difícil: menos plataformas (30% de 3, 70% de 2)
-            return roll < 0.3 ? 3 : 2;
-        }
+        // Chance contínua de 3 plataformas por fileira (60% no nível 1 → 25% no nível 5),
+        // em vez de degraus fixos entre níveis — progressão mais suave.
+        const t = (level - 1) / Math.max(LevelManager.MAX_LEVEL - 1, 1);
+        const chance3 = 0.6 - t * 0.35;
+        return Math.random() < chance3 ? 3 : 2;
     },
 
     _createRowEntries(level, rowIndex, count, rowY, canvasWidth) {

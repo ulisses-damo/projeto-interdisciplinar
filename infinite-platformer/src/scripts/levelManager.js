@@ -14,10 +14,10 @@ const LevelManager = {
     MAX_LEVEL: 5,
     PLATFORMS_PER_LEVEL: {
         1: 50,
-        2: 75,
-        3: 75,
-        4: 100,
-        5: 120,
+        2: 65,
+        3: 80,
+        4: 95,
+        5: 110,
     },
 
     getPlatformsForLevel(level) {
@@ -92,7 +92,7 @@ const LevelManager = {
             minGap: this.BASE_MIN_GAP + t * 10,                        // 85 → 95
             maxGap: Math.min(this.BASE_MAX_GAP + t * 5, 120),          // 115 → 120
             safety: this.BASE_SAFETY - t * 0.10,                        // 0.75 → 0.65
-            crumbleChance: lvl >= 2 ? 0.15 + (lvl - 2) * 0.08 : 0,    // 0, 15%, 23%, 31%, 39%
+            crumbleChance: 0.05 + t * 0.30,                             // 5%, 13.75%, 22.5%, 31.25%, 40%
         };
     },
 

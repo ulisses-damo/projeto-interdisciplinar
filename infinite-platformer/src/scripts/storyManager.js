@@ -3,12 +3,12 @@
 
 const StoryManager = {
     CARDS: [
-        { title: 'Vila Tranquila', text: 'Em uma vila pacata, Maicon vivia feliz ao lado da Princesa Lumi.', art: 'village', emoji: '🏡' },
-        { title: 'O Sequestro', text: 'Um dia, o temido Chefe Meteoro desceu dos céus e raptou a princesa!', art: 'kidnap', emoji: '👑' },
-        { title: 'A Jornada Começa', text: 'Destemido, Maicon parte em uma jornada para resgatá-la.', art: 'journey', emoji: '🏃' },
-        { title: 'Através dos Reinos', text: 'Ele atravessa o Céu Azul, o Deserto e o Vulcão, enfrentando perigos a cada passo...', art: 'realms', emoji: '🌋' },
-        { title: 'A Noite Antes da Batalha', text: 'Sob o céu estrelado, Maicon segue firme rumo ao topo do mundo.', art: 'night', emoji: '🌙' },
-        { title: 'O Confronto Final', text: 'No topo da Galáxia, o Chefe Meteoro o aguarda. Chegou a hora de salvar a princesa!', art: 'battle', emoji: '☄️' },
+        { title: 'Vila Tranquila', text: 'Em uma vila pacata, Maicon vivia feliz ao lado da Princesa Lumi.', art: 'village', sprites: ['maicon', 'princesa'] },
+        { title: 'O Sequestro', text: 'Um dia, o temido Chefe Meteoro desceu dos céus e raptou a princesa!', art: 'kidnap', sprites: ['princesa', 'boss'] },
+        { title: 'A Jornada Começa', text: 'Destemido, Maicon parte em uma jornada para resgatá-la.', art: 'journey', sprites: ['maicon-run'] },
+        { title: 'Através dos Reinos', text: 'Ele atravessa o Céu Azul, o Deserto e o Vulcão, enfrentando perigos a cada passo...', art: 'realms', sprites: ['maicon-run'] },
+        { title: 'A Noite Antes da Batalha', text: 'Sob o céu estrelado, Maicon segue firme rumo ao topo do mundo.', art: 'night', sprites: ['maicon-run'] },
+        { title: 'O Confronto Final', text: 'No topo da Galáxia, o Chefe Meteoro o aguarda. Chegou a hora de salvar a princesa!', art: 'battle', sprites: ['maicon', 'boss'] },
     ],
 
     currentIndex: 0,
@@ -63,7 +63,12 @@ const StoryManager = {
 
         if (art) {
             art.className = `story-art art-${card.art}`;
-            art.textContent = card.emoji;
+            art.innerHTML = '';
+            (card.sprites || []).forEach(key => {
+                const el = document.createElement('div');
+                el.className = `story-sprite story-sprite-${key}`;
+                art.appendChild(el);
+            });
         }
         if (title) title.textContent = card.title;
         if (text) text.textContent = card.text;

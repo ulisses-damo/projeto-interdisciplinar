@@ -26,11 +26,13 @@
 .story-art {
     height: 160px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+    gap: 18px;
     font-size: 4.5em;
     border-radius: 14px;
     margin-bottom: 20px;
+    padding-bottom: 12px;
     animation: float 3s ease-in-out infinite;
 }
 
@@ -40,6 +42,65 @@
 .art-realms    { background: linear-gradient(160deg, #7F1D1D, #991B1B); }
 .art-night     { background: linear-gradient(160deg, #0f172a, #312e81); }
 .art-battle    { background: linear-gradient(160deg, #140025, #a855f7); }
+
+/* Sprites reais (Maicon/Princesa/Chefe) recortados via background-position,
+   mesma técnica de crop pixelado usada em start-screen.css (.character:before) */
+.story-sprite {
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    flex-shrink: 0;
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+}
+
+.story-sprite-maicon,
+.story-sprite-maicon-run {
+    width: 96px;
+    height: 96px;
+    background-image: url('../assets/LULI.png');
+    background-size: 192px 192px;
+    background-position: 0 0;
+}
+
+.story-sprite-maicon-run {
+    animation: storyRunCycle 0.6s steps(1) infinite;
+}
+
+.story-sprite-princesa {
+    width: 96px;
+    height: 96px;
+    background-image: url('../assets/princesa.png');
+    background-size: 192px 96px;
+    background-position: 0 0;
+    animation: princessBlink 3.2s steps(1) infinite;
+}
+
+.story-sprite-boss {
+    width: 120px;
+    height: 120px;
+    background-image: url('../assets/chefe_meteoro.png');
+    background-size: 240px 240px;
+    background-position: 0 0;
+    animation: bossIdlePulse 1.4s steps(1) infinite;
+}
+
+@keyframes storyRunCycle {
+    0%   { background-position: 0 0; }
+    33%  { background-position: -96px 0; }
+    66%  { background-position: 0 -96px; }
+    100% { background-position: 0 0; }
+}
+
+@keyframes princessBlink {
+    0%, 85%   { background-position: 0 0; }
+    90%, 100% { background-position: -96px 0; }
+}
+
+@keyframes bossIdlePulse {
+    0%, 100% { background-position: 0 0; }
+    50%      { background-position: -120px 0; }
+}
 
 .story-card h2 {
     color: #FFD700;

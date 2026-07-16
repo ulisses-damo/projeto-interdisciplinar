@@ -1,29 +1,9 @@
 
-function createPlayerSprite(src) {
-    const image = new Image();
-    const sprite = {
-        image,
-        loaded: false,
-        src,
-    };
-
-    image.onload = function() {
-        sprite.loaded = true;
-    };
-
-    image.onerror = function() {
-        console.error(`Erro ao carregar o sprite! Verifique o caminho: ${src}`);
-    };
-
-    image.src = src;
-    return sprite;
-}
-
 const PLAYER_SPRITES = {
-    base: createPlayerSprite('./assets/LULI.png'),
-    jump: createPlayerSprite('./assets/pulando.png'),
-    fall: createPlayerSprite('./assets/caindo.png'),
-    death: createPlayerSprite('./assets/morrendo.png'),
+    base: createSprite('./assets/LULI.png'),
+    jump: createSprite('./assets/pulando.png'),
+    fall: createSprite('./assets/caindo.png'),
+    death: createSprite('./assets/morrendo.png'),
 };
 
 const PLAYER_ANIMATIONS = {
