@@ -101,7 +101,7 @@ function initBossLevel() {
     UIManager.hideGameOver();
 
     Input.reset();
-    TouchControls.setActive(true, true);
+    TouchControls.setActive(true);
     resetLoopTiming();
     requestAnimationFrame(gameLoop);
 }
@@ -404,6 +404,9 @@ function updateBossLevel() {
     BossItemManager.update(canvas.width, canvas.height);
     BossItemManager.checkPickup(player);
     BossItemManager.checkBossHit(BossManager);
+
+    // Botão de arremesso visível só enquanto carrega um item
+    TouchControls.setThrowAvailable(BossItemManager.carrying);
 
     if (BossManager.checkCollision(player)) {
         const survived = handlePlayerHit(() => {

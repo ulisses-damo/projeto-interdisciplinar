@@ -6,7 +6,7 @@
 //   para não pesar na instalação.
 // Ao publicar uma atualização, incremente a versão do CACHE_NAME.
 
-const CACHE_NAME = 'maicon-v1';
+const CACHE_NAME = 'maicon-v2';
 
 const CORE_ASSETS = [
     './',

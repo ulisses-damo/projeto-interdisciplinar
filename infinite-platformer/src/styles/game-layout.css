@@ -2,6 +2,10 @@
 canvas {
     display: block;
     margin: 0 auto;
+    /* Acima das decorações fixas de cenário (nuvens, sol/lua — z-index 0),
+       que antes pintavam por cima do canvas por serem posicionadas */
+    position: relative;
+    z-index: 1;
     background: linear-gradient(to bottom, #87CEEB 0%, #98d8f0 50%, #7fb069 100%);
     border: 3px solid #ffffff;
     border-radius: 10px;
