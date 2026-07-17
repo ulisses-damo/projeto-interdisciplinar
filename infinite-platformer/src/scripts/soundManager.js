@@ -71,4 +71,25 @@ const SoundManager = {
             this._backgroundTrack.volume(vol);
         }
     },
+
+    // Pausa/retoma tudo que estava tocando (usado quando o jogo vai
+    // para segundo plano — troca de aba ou app minimizado no celular)
+    _resumeBackground: false,
+    _resumeBoss: false,
+
+    pauseAll() {
+        this._resumeBackground = !!(this._backgroundTrack && this._backgroundTrack.playing());
+        this._resumeBoss = !!(this._bossTrackHowl && this._bossTrackHowl.playing());
+
+        if (this._resumeBackground) this._backgroundTrack.pause();
+        if (this._resumeBoss) this._bossTrackHowl.pause();
+    },
+
+    resumeAll() {
+        if (this._resumeBackground && this._backgroundTrack) this._backgroundTrack.play();
+        if (this._resumeBoss && this._bossTrackHowl) this._bossTrackHowl.play();
+
+        this._resumeBackground = false;
+        this._resumeBoss = false;
+    },
 };

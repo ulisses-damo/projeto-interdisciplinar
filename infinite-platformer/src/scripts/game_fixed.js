@@ -68,6 +68,9 @@ function init(level) {
     UIManager.hideLevelComplete();
     UIManager.hideGameOver();
 
+    Input.reset();
+    TouchControls.setActive(true);
+    resetLoopTiming();
     requestAnimationFrame(gameLoop);
 }
 
@@ -97,6 +100,9 @@ function initBossLevel() {
     UIManager.hideLevelComplete();
     UIManager.hideGameOver();
 
+    Input.reset();
+    TouchControls.setActive(true, true);
+    resetLoopTiming();
     requestAnimationFrame(gameLoop);
 }
 
@@ -104,6 +110,7 @@ function handleBossVictory() {
     if (isGameOver) return;
 
     isGameOver = true;
+    TouchControls.setActive(false);
     SoundManager.stop();
     UIManager.showLevelComplete(LevelManager.currentLevel, false);
 
@@ -120,6 +127,7 @@ function finalizeGameOver() {
 
     isPlayerDying = false;
     isGameOver = true;
+    TouchControls.setActive(false);
     UIManager.showGameOver(platformCount, LevelManager.currentLevel);
 }
 
@@ -156,13 +164,49 @@ function handlePlayerHit(onSurvive) {
 }
 
 // ===== GAME LOOP =====
-function gameLoop() {
+// Passo fixo com acumulador: a física roda sempre em passos de 1/60s,
+// independente da taxa de atualização da tela (60/90/120 Hz).
+const STEP_MS = 1000 / 60;
+const MAX_STEPS_PER_FRAME = 5;
+let loopLastTime = 0;
+let loopAccumulator = 0;
+
+function resetLoopTiming() {
+    loopLastTime = 0;
+    loopAccumulator = 0;
+}
+
+function gameLoop(timestamp) {
     if (isGameOver) return;
+
+    if (!loopLastTime) loopLastTime = timestamp;
+    loopAccumulator += timestamp - loopLastTime;
+    loopLastTime = timestamp;
+
+    // Evita rajada de passos após pausas longas (troca de aba, etc.)
+    if (loopAccumulator > STEP_MS * MAX_STEPS_PER_FRAME) {
+        loopAccumulator = STEP_MS * MAX_STEPS_PER_FRAME;
+    }
+
+    while (loopAccumulator >= STEP_MS && !isGameOver) {
+        update();
+        loopAccumulator -= STEP_MS;
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    update();
     render();
     requestAnimationFrame(gameLoop);
 }
+
+// Pausa em segundo plano: zera o relógio ao voltar e pausa/retoma a música
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        SoundManager.pauseAll();
+    } else {
+        resetLoopTiming();
+        SoundManager.resumeAll();
+    }
+});
 
 // ===== UPDATE =====
 function update() {
@@ -182,6 +226,7 @@ function update() {
     }
 
     // --- Movimento do jogador ---
+    applyInput();
     player.x += player.velocityX;
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
@@ -235,6 +280,8 @@ function update() {
                 if (platformCount >= LevelManager.getPlatformsForLevel(LevelManager.currentLevel)) {
                     isGameOver = true;
                     const lvl = LevelManager.currentLevel;
+
+                    TouchControls.setActive(false);
 
                     // Parar música ao completar nível
                     SoundManager.stop();
@@ -330,6 +377,7 @@ function updateBossLevel() {
     }
 
     // --- Movimento do jogador ---
+    applyInput();
     player.x += player.velocityX;
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
@@ -432,9 +480,20 @@ function renderBossLevel() {
 }
 
 // ===== INPUT =====
-window.addEventListener('keydown', (event) => {
-    if (!player || player.isDying) return;
-    if (event.code === 'Space') {
+// Teclado e toque (touchControls.js) escrevem no objeto Input;
+// applyInput() traduz esse estado para o player a cada passo do update.
+function applyInput() {
+    if (Input.left && !Input.right) {
+        player.velocityX = -3;
+        player.facingLeft = true;
+    } else if (Input.right && !Input.left) {
+        player.velocityX = 3;
+        player.facingLeft = false;
+    } else {
+        player.velocityX = 0;
+    }
+
+    if (Input.consumeJump()) {
         if (!player.isJumping) {
             player.jump();
             player._doubleJumpUsed = false;
@@ -443,23 +502,31 @@ window.addEventListener('keydown', (event) => {
             player.velocityY = -10;
             player._doubleJumpUsed = true;
         }
-    } else if (event.code === 'ArrowLeft') {
-        player.velocityX = -3;
-        player.facingLeft = true;
-    } else if (event.code === 'ArrowRight') {
-        player.velocityX = 3;
-        player.facingLeft = false;
-    } else if (event.code === 'ArrowUp' && LevelManager.isBossLevel(LevelManager.currentLevel)) {
-        event.preventDefault();
+    }
+
+    if (Input.consumeThrow() && LevelManager.isBossLevel(LevelManager.currentLevel)) {
         BossItemManager.throwItem(player);
+    }
+}
+
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+        event.preventDefault();
+        Input.queueJump();
+    } else if (event.code === 'ArrowLeft') {
+        Input.left = true;
+    } else if (event.code === 'ArrowRight') {
+        Input.right = true;
+    } else if (event.code === 'ArrowUp') {
+        event.preventDefault();
+        Input.queueThrow();
     }
 });
 
 window.addEventListener('keyup', (event) => {
-    if (!player || player.isDying) return;
-    if (event.code === 'ArrowLeft' && player.velocityX < 0) {
-        player.velocityX = 0;
-    } else if (event.code === 'ArrowRight' && player.velocityX > 0) {
-        player.velocityX = 0;
+    if (event.code === 'ArrowLeft') {
+        Input.left = false;
+    } else if (event.code === 'ArrowRight') {
+        Input.right = false;
     }
 });

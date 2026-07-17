@@ -2,8 +2,15 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>As Aventuras de Maicon</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/animations.css">
     <link rel="stylesheet" href="styles/start-screen.css">
@@ -17,6 +24,7 @@
     <link rel="stylesheet" href="styles/levels/level3.css">
     <link rel="stylesheet" href="styles/levels/level4.css">
     <link rel="stylesheet" href="styles/levels/level5.css">
+    <link rel="stylesheet" href="styles/mobile.css">
 </head>
 <body>
     <!-- Tela de Início -->
@@ -73,10 +81,14 @@
             <div class="boss-health-track"><div id="bossHealthFill" class="boss-health-fill"></div></div>
         </div>
         <div id="bossItemIndicator" class="boss-item-indicator">🪨</div>
-        <div style="margin-top: 70px; display: flex; flex-direction: column; align-items: center;">
+        <div id="canvasContainer">
             <canvas id="gameCanvas" width="800" height="600"></canvas>
             <p class="game-instructions" style="margin-top: 10px; margin-bottom: 0;">Use as setas ⬅️➡️ para mover e ESPAÇO para pular!</p>
         </div>
+
+        <!-- Camada invisível de controles touch (ativada só em telas touch) -->
+        <div id="touchOverlay"></div>
+        <div id="touchHint" style="display:none;"></div>
     </div>
 
     <!-- Overlay de conclusão de nível -->
@@ -93,25 +105,28 @@
     </div>
 
     <!-- Overlay de transição de nível (mantido para compatibilidade) -->
-    <div id="levelTransition" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:50; justify-content:center; align-items:center; transition: opacity 0.6s ease;">
-        <div id="levelTransitionText" style="color:white; font-family:'Arial Black',sans-serif; font-size:3.5em; text-align:center; text-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,215,0,0.4); animation: zoomIn 0.5s ease-out;"></div>
+    <div id="levelTransition" style="display:none;">
+        <div id="levelTransitionText"></div>
     </div>
 
     <!-- Game Over -->
-    <div id="gameOverBox" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,58,138,0.9); z-index:10; justify-content:center; align-items:center;">
-      <div style="background:white; padding:40px 60px; border-radius:20px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:3px solid #1e3a8a;">
-        <h2 style="color:#1e3a8a; margin-bottom:10px; font-size:2em;">Fim de jogo!</h2>
-        <p id="finalLevel" style="color:#F59E0B; font-weight:bold; font-size:1.2em; margin-bottom:15px;">Nível 1</p>
-        <p style="color:#666; margin-bottom:25px; font-size:1.1em;">Você alcançou <span id="finalScore" style="color:#1e3a8a; font-weight:bold;">0</span> plataformas!</p>
-                <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-                    <button id="retryBtn" style="font-size:1.2em; padding:12px 35px; border-radius:10px; border:none; background:#F59E0B; color:white; cursor:pointer; transition:background-color 0.3s;">Tentar novamente</button>
-                    <button id="restartBtn" style="font-size:1.2em; padding:12px 35px; border-radius:10px; border:none; background:#1e3a8a; color:white; cursor:pointer; transition:background-color 0.3s;">Escolher Nível</button>
-                </div>
+    <div id="gameOverBox" style="display:none;">
+      <div class="game-over-card">
+        <h2>Fim de jogo!</h2>
+        <p id="finalLevel">Nível 1</p>
+        <p class="game-over-score">Você alcançou <span id="finalScore">0</span> plataformas!</p>
+        <div class="game-over-actions">
+            <button id="retryBtn">Tentar novamente</button>
+            <button id="restartBtn">Escolher Nível</button>
+        </div>
       </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script src="scripts/vendor/howler.min.js"></script>
     <script src="scripts/utils.js"></script>
+    <script src="scripts/input.js"></script>
+    <script src="scripts/viewport.js"></script>
+    <script src="scripts/touchControls.js"></script>
     <script src="scripts/player.js"></script>
     <script src="scripts/platform.js"></script>
     <script src="scripts/camera.js"></script>
@@ -127,5 +142,13 @@
     <script src="scripts/uiManager.js"></script>
     <script src="scripts/storyManager.js"></script>
     <script src="scripts/game_fixed.js"></script>
+    <script>
+        // PWA: registra o service worker (só funciona em HTTPS ou localhost)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+    </script>
 </body>
 </html>

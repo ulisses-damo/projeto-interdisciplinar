@@ -147,7 +147,12 @@ const UIManager = {
     init() {
         const playBtn = document.getElementById('playBtn');
         if (playBtn) {
-            playBtn.addEventListener('click', () => this.startGame());
+            playBtn.addEventListener('click', () => {
+                // Fullscreen + trava de orientação precisam acontecer
+                // dentro do gesto do usuário (este clique)
+                Viewport.enterMobileFullscreen();
+                this.startGame();
+            });
         }
 
         const retryBtn = document.getElementById('retryBtn');

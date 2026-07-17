@@ -9,6 +9,13 @@ canvas {
     transition: background 1.5s ease;
 }
 
+#canvasContainer {
+    margin-top: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 #gameScreen {
     position: fixed;
     top: 0;
