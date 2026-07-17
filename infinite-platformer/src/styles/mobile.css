@@ -12,8 +12,14 @@ body {
     touch-action: none;
 }
 
+/* Jogo não tem texto selecionável: bloqueia a seleção/realce que o
+   navegador dispara ao segurar um botão ou o canvas (toque longo) */
 body {
     -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* O HUD é apenas exibição — deixa o toque atravessar até a camada de controle */
